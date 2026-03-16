@@ -550,6 +550,64 @@ function buildLogin(screen){
   if(S.loading)lb.style.opacity="0.7";
   card.appendChild(lb);
 
+  // ── INSTALL BUTTON — always visible until installed ──
+  if(!isInStandalone()){
+    const installBox=div("");
+    installBox.style.cssText="background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;padding:14px;margin-top:12px;";
+
+    if(isIOS()){
+      installBox.innerHTML=`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <span style="font-size:26px">📲</span>
+          <div style="font-weight:800;font-size:14px;color:#15803d">Install on iPhone</div>
+        </div>
+        <div style="font-size:12px;color:#374151;line-height:2.2">
+          1️⃣ Tap <strong>Share ⎙</strong> at the bottom of Safari<br>
+          2️⃣ Scroll and tap <strong>"Add to Home Screen"</strong><br>
+          3️⃣ Tap <strong>Add</strong> ✅
+        </div>`;
+    } else {
+      // Android — show install button if prompt ready, else show manual steps
+      installBox.innerHTML=`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <span style="font-size:26px">📲</span>
+          <div style="font-weight:800;font-size:14px;color:#15803d">Install ACT Portal</div>
+        </div>`;
+
+      const installBtn=btn("","⬇️ Tap to Install",async()=>{
+        if(deferredPrompt){
+          deferredPrompt.prompt();
+          const{outcome}=await deferredPrompt.userChoice;
+          deferredPrompt=null;
+          if(outcome==="accepted"){showToast("🎉 App Installed!");render();}
+          else render();
+        } else {
+          // Show manual steps if no prompt
+          manualSteps.style.display="block";
+          installBtn.style.display="none";
+        }
+      });
+      css(installBtn,{
+        width:"100%",background:"#16a34a",color:"#fff",
+        border:"none",borderRadius:"10px",padding:"13px",
+        fontSize:"14px",fontWeight:"800",marginBottom:"8px"
+      });
+
+      const manualSteps=div("");
+      manualSteps.style.display="none";
+      manualSteps.innerHTML=`
+        <div style="font-size:12px;color:#374151;line-height:2.2">
+          1️⃣ Tap <strong>⋮</strong> (3 dots) at top right of Chrome<br>
+          2️⃣ Tap <strong>"Add to Home Screen"</strong><br>
+          3️⃣ Tap <strong>Add</strong> ✅
+        </div>`;
+
+      installBox.appendChild(installBtn);
+      installBox.appendChild(manualSteps);
+    }
+    card.appendChild(installBox);
+  }
+
 
 
 
