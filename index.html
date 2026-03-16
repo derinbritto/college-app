@@ -208,61 +208,6 @@ function loadSavedConfig(){try{return JSON.parse(localStorage.getItem("act_fb_co
 let FB_URL = "https://act-portal-ad480-default-rtdb.firebaseio.com";
 
 
-// ── Firebase Cloud Messaging Setup ────────────────────────────
-const FCM_CONFIG = {
-  apiKey: "placeholder", // not needed for FCM token only
-  projectId: FCM_PROJECT_ID,
-  messagingSenderId: "placeholder",
-  appId: "placeholder"
-};
-let fcmApp = null;
-let fcmMessaging = null;
-
-
-let messagingInstance = null;
-
-
-
-async function sendFCMToAll(title, body) {
-  // Save notification to Firebase — FCM handled by service worker
-  // Also store token list for reference
-  try {
-    const tokensSnap = await dbGet("fcmTokens");
-    if(!tokensSnap) return 0;
-    const tokens = Object.values(tokensSnap).filter(t => t.role === "student" && t.token);
-    // Store broadcast in Firebase so SW can trigger notifications
-    await dbPush("broadcasts", {
-      title, body,
-      tokens: tokens.map(t => t.token),
-      time: Date.now(),
-      from: APP.authUser?.name || "Staff"
-    });
-    return tokens.length;
-  } catch(e) {
-    console.log("FCM send error:", e);
-    return 0;
-  }
-}
-let sseConnections = [];
-
-function initFirebase(config) {
-  try {
-    FB_URL = config.databaseURL.replace(/\/+$/, "");
-    if(!FB_URL || !FB_URL.startsWith("http")) return false;
-    // Close old SSE connections
-    sseConnections.forEach(s=>s.close());
-    sseConnections = [];
-    APP.dbStatus = "connecting";
-    startListeners();
-    return true;
-  } catch(e) {
-    console.error("Firebase init error:", e);
-    return false;
-  }
-}
-
-function fbUrl(path) { return `${FB_URL}/${path}.json`; }
-
 // ── Helpers ────────────────────────────────────────────────────
 const scoreToGrade = s => s<50?"F":s>=91?"O":s>=81?"A+":s>=71?"A":s>=61?"B+":"B";
 const isPass = s => s >= PASS_MARK;
