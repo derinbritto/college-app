@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#16a34a"/>
+  <rect x="60" y="60" width="392" height="392" rx="60" fill="#15803d"/>
+  <!-- Building -->
+  <rect x="156" y="220" width="200" height="170" rx="8" fill="#fff"/>
+  <!-- Roof -->
+  <polygon points="130,230 256,130 382,230" fill="#fff"/>
+  <!-- Door -->
+  <rect x="216" y="300" width="60" height="90" rx="6" fill="#16a34a"/>
+  <!-- Windows -->
+  <rect x="170" y="250" width="40" height="35" rx="4" fill="#86efac"/>
+  <rect x="302" y="250" width="40" height="35" rx="4" fill="#86efac"/>
+  <!-- Flag pole -->
+  <rect x="250" y="100" width="6" height="40" fill="#fbbf24"/>
+  <polygon points="256,100 290,115 256,130" fill="#ef4444"/>
+  <!-- Text ACT -->
+  <text x="256" y="430" font-size="58" font-weight="900" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif">ACT</text>
+</svg>

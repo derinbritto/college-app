@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"/>
+<title>ACT — College Portal</title>
+<meta name="theme-color" content="#16a34a"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="ACT Portal"/>
+<link rel="manifest" href="manifest.json"/>
+
+
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif;}
+body{min-height:100vh;background:linear-gradient(135deg,#bbf7d0,#86efac,#4ade80);display:flex;justify-content:center;align-items:flex-start;padding:20px;}
+/* Desktop — phone mockup */
+@media (min-width:601px){
+  body{min-height:100vh;background:linear-gradient(135deg,#bbf7d0,#86efac,#4ade80);display:flex;justify-content:center;align-items:flex-start;padding:20px;}
+  #phone{width:390px;min-height:780px;border-radius:44px;box-shadow:0 40px 100px rgba(0,0,0,0.3),0 0 0 8px #15803d;}
+}
+/* Mobile — true fullscreen */
+@media (max-width:600px){
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;
+    width:100%;height:100%;
+    overflow:hidden;
+    background:#fff;
+  }
+  body{display:block;}
+  #phone{
+    position:fixed !important;
+    top:0 !important;
+    left:0 !important;
+    right:0 !important;
+    bottom:0 !important;
+    width:100% !important;
+    height:100% !important;
+    min-height:100% !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
+    margin:0 !important;
+    display:flex;
+    flex-direction:column;
+  }
+  .screen{
+    display:flex;
+    flex-direction:column;
+    flex:1;
+    height:100%;
+    min-height:unset !important;
+    overflow:hidden;
+  }
+  .bottom-nav{
+    flex-shrink:0;
+    width:100%;
+    background:#fff;
+    border-top:1px solid #e5e7eb;
+    padding:6px 0 0 0;
+    padding-bottom:calc(env(safe-area-inset-bottom) + 16px);
+    margin-bottom:0;
+  }
+  .scroll{
+    flex:1;
+    overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+  }
+  .overlay,.toast,.saving{position:fixed !important;}
+  .login-card{overflow-y:auto;}
+}
+#phone{width:390px;min-height:780px;background:#fff;border-radius:44px;box-shadow:0 40px 100px rgba(0,0,0,0.3),0 0 0 8px #15803d;overflow:hidden;display:flex;flex-direction:column;position:relative;margin:auto;}
+input,select,button{font-family:inherit;font-size:inherit;}
+input:focus,select:focus{outline:none;}
+button{cursor:pointer;}
+.screen{display:flex;flex-direction:column;height:100%;min-height:780px;}
+.login-top{background:linear-gradient(160deg,#15803d,#16a34a 60%,#22c55e);padding:36px 24px 28px;position:relative;overflow:hidden;text-align:center;flex-shrink:0;}
+.c1{position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.08);}
+.c2{position:absolute;bottom:-20px;left:-30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.06);}
+.login-card{flex:1;overflow-y:auto;padding:20px;}
+.role-toggle{display:flex;background:#f3f4f6;border-radius:12px;padding:4px;margin-bottom:16px;gap:4px;}
+.role-btn{flex:1;background:transparent;border:none;border-radius:10px;padding:8px;font-size:12px;font-weight:600;color:#6b7280;}
+.role-btn.active{background:#fff;color:#16a34a;box-shadow:0 1px 4px rgba(0,0,0,0.12);}
+.field{margin-bottom:12px;}
+.field-label{font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;}
+.field-inner{display:flex;align-items:center;border:1.5px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fafafa;}
+.field-icon{padding:0 10px;font-size:16px;}
+.field-inner input{flex:1;border:none;background:transparent;padding:12px 0;font-size:14px;color:#111;}
+.eye-btn{background:none;border:none;padding:0 12px;font-size:16px;}
+.forgot-link{background:none;border:none;color:#16a34a;font-size:12px;font-weight:600;padding:2px 0 10px;display:block;text-align:left;}
+.err-box{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;border-radius:10px;padding:8px 12px;font-size:12px;margin-bottom:10px;}
+.login-btn{width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;margin-bottom:16px;}
+.hdr{background:linear-gradient(135deg,#15803d,#16a34a);padding:18px 16px 14px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.hdr-title{color:#fff;font-weight:800;font-size:16px;}
+.hdr-sub{color:rgba(255,255,255,0.7);font-size:10px;margin-top:1px;}
+.logout-btn{background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:600;}
+.profile-card{background:linear-gradient(135deg,#f0fdf4,#dcfce7);margin:10px 10px 0;border-radius:18px;padding:14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(22,163,74,0.12);}
+.profile-photo{font-size:38px;background:#fff;border-radius:50%;width:52px;height:52px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.grade-badge{color:#fff;font-weight:900;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;}
+.tab-row{display:flex;border-bottom:1px solid #e5e7eb;padding:0 4px;flex-shrink:0;margin-top:8px;overflow-x:auto;}
+.tab-btn{flex:0 0 auto;background:none;border:none;padding:9px 7px;font-size:10px;font-weight:600;white-space:nowrap;color:#9ca3af;border-bottom:2px solid transparent;}
+.tab-btn.active{color:#16a34a;border-bottom:2.5px solid #16a34a;}
+.scroll{flex:1;overflow-y:auto;padding:8px 12px;}
+.bottom-nav{display:flex;background:#fff;border-top:1px solid #e5e7eb;padding-bottom:8px;flex-shrink:0;}
+.nav-btn{flex:1;background:none;border:none;padding:8px 4px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;color:#9ca3af;font-size:10px;font-weight:600;}
+.nav-btn.active{color:#16a34a;}
+.nav-icon{font-size:18px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.stat-card{background:#f9fafb;border-radius:14px;padding:12px;border:1px solid #e5e7eb;}
+.stat-val{font-size:20px;font-weight:900;}
+.stat-label{font-size:10px;color:#6b7280;margin-top:2px;}
+.alert{border-radius:10px;padding:8px 12px;font-size:12px;margin-bottom:6px;}
+.alert-red{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;}
+.alert-yellow{background:#fef3c7;border:1px solid #fde68a;color:#92400e;}
+.alert-green{background:#dcfce7;border:1px solid #86efac;color:#166534;}
+.alert-blue{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;}
+.sec{font-size:12px;font-weight:700;color:#374151;margin-bottom:8px;margin-top:6px;}
+.empty{color:#9ca3af;text-align:center;font-size:13px;padding:24px;}
+.mark-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;border-radius:10px;padding:4px 6px;}
+.mark-sub{width:84px;font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mark-bar-wrap{flex:1;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;}
+.mark-bar-fill{height:100%;border-radius:4px;}
+.fee-cat{background:#f9fafb;border:1px solid #e5e7eb;border-radius:14px;padding:12px 14px;margin-bottom:10px;}
+.staff-card{background:#f9fafb;border-radius:14px;padding:12px;margin-bottom:10px;border:1px solid #e5e7eb;}
+.sub-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;background:#f9fafb;border-radius:10px;padding:6px 8px;}
+.sub-row-label{flex:1;font-size:11px;font-weight:600;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sub-row-input{width:56px;border:1.5px solid #d1d5db;border-radius:8px;padding:5px 6px;font-size:12px;text-align:center;background:#fff;}
+.grade-select{border:none;border-radius:8px;padding:5px 6px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;min-width:46px;}
+.send-row{display:flex;gap:8px;margin-top:8px;}
+.send-btn{flex:1;border:none;border-radius:10px;color:#fff;padding:9px;font-size:11px;font-weight:700;}
+.fg{margin-bottom:12px;}
+.fl{font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;}
+.fi{width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:13px;background:#fff;}
+.ferr{font-size:11px;color:#dc2626;margin-top:3px;font-weight:500;}
+.action-btn{width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;margin-top:4px;}
+.overlay{position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;z-index:50;}
+.modal{background:#fff;border-radius:22px 22px 0 0;padding:22px;width:100%;}
+.toast{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:#15803d;color:#fff;padding:10px 18px;border-radius:20px;font-weight:600;font-size:12px;z-index:99;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
+.notif-card{display:flex;gap:10px;align-items:flex-start;border-radius:12px;padding:10px 12px;margin-bottom:8px;}
+.att-ring{width:110px;height:110px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:20px auto 12px;}
+.detail-card{background:#f9fafb;border-radius:14px;padding:12px;border:1px solid #e5e7eb;}
+.detail-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:12px;}
+.gender-row{display:flex;gap:8px;}
+.gender-btn{flex:1;border-radius:10px;padding:8px;font-weight:700;font-size:12px;}
+/* Loading spinner */
+.spinner{width:36px;height:36px;border:4px solid #e5e7eb;border-top:4px solid #16a34a;border-radius:50%;animation:spin 0.8s linear infinite;margin:40px auto;}
+@keyframes spin{to{transform:rotate(360deg);}}
+/* DB status dot */
+.db-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;}
+.db-online{background:#22c55e;}
+.db-offline{background:#ef4444;}
+.db-connecting{background:#f59e0b;animation:pulse 1s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+/* Save indicator */
+.saving{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:#fff;padding:4px 12px;border-radius:20px;font-size:10px;z-index:80;}
+</style>
+<!-- Firebase App + Messaging -->
+</head>
+<body>
+<div id="phone"></div>
+
+<script>
+// ── Constants ─────────────────────────────────────────────────
+const HARDCODED_STAFF = [
+  {id:"staff1",role:"staff",email:"staff1@2026",password:"2026",name:"staff1",photo:"👨‍🏫",department:"IT"},
+  {id:"staff2",role:"staff",email:"staff2@2026",password:"2026",name:"staff2",photo:"👨‍🏫",department:"IT"},
+];
+const DEFAULT_SUBJECTS = ["Data Structures","Networks","DBMS","Web Tech","English","Operating Systems","Software Engg"];
+const GRADE_OPTIONS = ["O","A+","A","B+","B","C","F"];
+const GRADE_COLORS = {O:"#16a34a","A+":"#0d9488",A:"#2563eb","B+":"#7c3aed",B:"#9333ea",C:"#ca8a04",F:"#dc2626"};
+const PASS_MARK = 50;
+const CI = {name:"Arjun College of Technology",short:"ACT",tagline:"Shaping Future Innovators — Information Technology"};
+
+// ── App State ──────────────────────────────────────────────────
+let APP = {
+  screen:"login",  // login | forgot | student | staff
+  authUser: null,
+  dbStatus: "connecting", // connecting | online | offline
+  saving: false,
+
+  // Live data from Firebase
+  students: {},     // {id: studentObj}
+  staffList: {},    // {id: staffObj}
+  marks: {},        // {studentId: {subject: score}}
+  grades: {},       // {studentId: {subject: grade}}
+  attendance: {},   // {studentId: pct}
+  subjects: [...DEFAULT_SUBJECTS],
+  notifications: [],// array
+
+  // UI state
+  staffView:"upload", staffSearch:"",
+  subjectEditing:false, subjectDraft:[...DEFAULT_SUBJECTS],
+  editingStaffId:null,
+  addForm:emptyStudentForm(), addErrors:{},
+  staffForm:emptyStaffForm(), staffFormErrors:{},
+  modal:null, toast:"", toastTimer:null,
+  fbConfig: loadSavedConfig(),
+};
+
+function emptyStudentForm(){return{name:"",roll:"",email:"",password:"",semester:"Semester 1",gender:"male",attendance:"85",parentPhone:"",tuitionTotal:"45000",hostelTotal:"30000",placementTotal:"5000",transportTotal:"12000",tuitionPaid:"",hostelPaid:"",placementPaid:"",transportPaid:""};}
+function emptyStaffForm(){return{name:"",email:"",password:"",department:"IT",gender:"male"};}
+function loadSavedConfig(){try{return JSON.parse(localStorage.getItem("act_fb_config")||"null");}catch{return null;}}
+
+// ── Firebase REST API (no SDK needed!) ────────────────────────
+let FB_URL = "https://act-portal-ad480-default-rtdb.firebaseio.com";
+
+
+// ── Firebase Cloud Messaging Setup ────────────────────────────
+const FCM_CONFIG = {
+  apiKey: "placeholder", // not needed for FCM token only
+  projectId: FCM_PROJECT_ID,
+  messagingSenderId: "placeholder",
+  appId: "placeholder"
+};
+let fcmApp = null;
+let fcmMessaging = null;
+
+
+let messagingInstance = null;
+
+
+
+async function sendFCMToAll(title, body) {
+  // Save notification to Firebase — FCM handled by service worker
+  // Also store token list for reference
+  try {
+    const tokensSnap = await dbGet("fcmTokens");
+    if(!tokensSnap) return 0;
+    const tokens = Object.values(tokensSnap).filter(t => t.role === "student" && t.token);
+    // Store broadcast in Firebase so SW can trigger notifications
+    await dbPush("broadcasts", {
+      title, body,
+      tokens: tokens.map(t => t.token),
+      time: Date.now(),
+      from: APP.authUser?.name || "Staff"
+    });
+    return tokens.length;
+  } catch(e) {
+    console.log("FCM send error:", e);
+    return 0;
+  }
+}
+let sseConnections = [];
+
+function initFirebase(config) {
+  try {
+    FB_URL = config.databaseURL.replace(/\/+$/, "");
+    if(!FB_URL || !FB_URL.startsWith("http")) return false;
+    // Close old SSE connections
+    sseConnections.forEach(s=>s.close());
+    sseConnections = [];
+    APP.dbStatus = "connecting";
+    startListeners();
+    return true;
+  } catch(e) {
+    console.error("Firebase init error:", e);
+    return false;
+  }
+}
+
+function fbUrl(path) { return `${FB_URL}/${path}.json`; }
+
+// ── Helpers ────────────────────────────────────────────────────
+const scoreToGrade = s => s<50?"F":s>=91?"O":s>=81?"A+":s>=71?"A":s>=61?"B+":"B";
+const isPass = s => s >= PASS_MARK;
+const getAttColor = p => p>=85?"#16a34a":p>=75?"#ca8a04":"#dc2626";
+
+function getGrade(marks) {
+  const vals=Object.values(marks);
+  if(!vals.length) return{grade:"—",label:"N/A",color:"#6b7280"};
+  if(vals.some(v=>v<PASS_MARK)) return{grade:"F",label:"Failed",color:"#dc2626"};
+  const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
+  if(avg>=90) return{grade:"O",label:"Outstanding",color:"#16a34a"};
+  if(avg>=75) return{grade:"A",label:"Excellent",color:"#2563eb"};
+  if(avg>=60) return{grade:"B",label:"Good",color:"#7c3aed"};
+  return{grade:"C",label:"Average",color:"#ca8a04"};
+}
+
+function resolveMarks(studentId) {
+  const mo = APP.marks[studentId]||{};
+  const r={};
+  APP.subjects.forEach(sub=>{ r[sub] = (mo[sub]!==undefined) ? mo[sub] : 0; });
+  return r;
+}
+
+function allStudents() { return Object.values(APP.students); }
+function allStaff() {
+  const dynStaff = Object.values(APP.staffList);
+  // Merge hardcoded with overrides from DB
+  return HARDCODED_STAFF.map(h => {
+    const ov = dynStaff.find(d=>d.id===h.id);
+    return ov ? {...h,...ov} : h;
+  }).concat(dynStaff.filter(d=>!HARDCODED_STAFF.find(h=>h.id===d.id)));
+}
+function allUsers() { return [...HARDCODED_STAFF, ...allStudents(), ...Object.values(APP.staffList)]; }
+
+function showToast(msg) {
+  if(APP.toastTimer) clearTimeout(APP.toastTimer);
+  APP.toast=msg;
+  APP.toastTimer=setTimeout(()=>{APP.toast="";render();},3000);
+}
+
+// ── DOM Helpers ────────────────────────────────────────────────
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e;}
+function div(cls){return el("div",cls);}
+function span(cls,txt){return el("span",cls,txt);}
+function btn(cls,txt,onclick){const b=el("button",cls,txt);b.onclick=onclick;return b;}
+function css(e,s){Object.assign(e.style,s);return e;}
+function inp(ph,val,cb,type="text"){const i=document.createElement("input");i.type=type;i.placeholder=ph;i.value=val||"";i.className="fi";i.oninput=cb;return i;}
+function fieldRow(label,req,input,err){
+  const fg=div("fg"),fl=div("fl");fl.textContent=label;
+  if(req){const s=span("","*");s.style.color="#dc2626";fl.appendChild(s);}
+  fg.appendChild(fl);fg.appendChild(input);
+  if(err){const e=div("ferr");e.textContent=err;fg.appendChild(e);}
+  return fg;
+}
+function loginField(label,icon,inputEl){
+  const w=div("field"),l=div("field-label");l.textContent=label;
+  const inner=div("field-inner");inner.appendChild(span("field-icon",icon));inner.appendChild(inputEl);
+  w.appendChild(l);w.appendChild(inner);return w;
+}
+function secTitle(txt){const d=div("sec");d.textContent=txt;return d;}
+function emptyMsg(txt){const d=div("empty");d.textContent=txt;return d;}
+function alertEl(type,txt){const d=div("alert alert-"+type);d.textContent=txt;return d;}
+function progressBar(pct,color,h=8){
+  const w=div("");css(w,{height:h+"px",background:"#e5e7eb",borderRadius:"4px",overflow:"hidden",marginTop:"5px"});
+  const f=div("");css(f,{height:"100%",width:pct+"%",background:color,borderRadius:"4px"});
+  w.appendChild(f);return w;
+}
+function statCard(val,label,color,pct){
+  const c=div("stat-card"),v=div("stat-val"),l=div("stat-label");
+  v.textContent=val;v.style.color=color;l.textContent=label;
+  c.appendChild(v);c.appendChild(l);
+  if(pct!==undefined)c.appendChild(progressBar(pct,color,4));
+  return c;
+}
+function headerEl(title,sub,onLogout){
+  const h=div("hdr"),left=div(""),t=div("hdr-title"),s=div("hdr-sub"),lb=btn("logout-btn","⎋ Logout",onLogout);
+  t.textContent=title;s.textContent=sub;left.appendChild(t);left.appendChild(s);h.appendChild(left);
+  // DB status
+  const dot=div("");dot.style.cssText=`display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:${APP.dbStatus==="online"?"#22c55e":APP.dbStatus==="offline"?"#ef4444":"#f59e0b"};`;
+  const st=div("");st.style.cssText="display:flex;align-items:center;gap:6px;";
+  st.appendChild(dot);st.appendChild(lb);h.appendChild(st);
+  return h;
+}
+function profileCardEl(user,badge,badgeColor,badgeFontSize){
+  const c=div("profile-card"),ph=div("profile-photo"),info=div(""),nm=div(""),sub=div(""),em=div(""),gb=div("grade-badge");
+  ph.textContent=user.photo;nm.style.cssText="font-weight:800;font-size:15px;";nm.textContent=user.name;
+  sub.style.cssText="font-size:10px;color:#6b7280;";sub.textContent=user.roll||user.department;
+  em.style.cssText="font-size:10px;color:#16a34a;font-weight:500;";em.textContent=user.email;
+  css(info,{flex:"1",minWidth:"0"});info.appendChild(nm);info.appendChild(sub);info.appendChild(em);
+  gb.textContent=badge;gb.style.background=badgeColor;if(badgeFontSize)gb.style.fontSize=badgeFontSize+"px";
+  c.appendChild(ph);c.appendChild(info);c.appendChild(gb);return c;
+}
+function tabsEl(tabs,labels,active,onChange){
+  const row=div("tab-row");
+  tabs.forEach((t,i)=>{const b=btn("tab-btn"+(t===active?" active":""),labels[i],()=>onChange(t));row.appendChild(b);});
+  return row;
+}
+function bottomNavEl(items,active,onChange){
+  const nav=div("bottom-nav");
+  items.forEach(item=>{
+    const b=btn("nav-btn"+(item.v===active?" active":""),"",()=>onChange(item.v));
+    const ic=div("nav-icon");ic.textContent=item.icon;const lb=div("");lb.textContent=item.label;
+    b.appendChild(ic);b.appendChild(lb);nav.appendChild(b);
+  });
+  return nav;
+}
+function genderToggle(value,onChange,ml,fl2){
+  const row=div("gender-row");
+  ["male","female"].forEach(g=>{
+    const active=value===g;
+    const b=btn("gender-btn",g==="male"?(ml||"👨‍🏫 Male"):(fl2||"👩‍🏫 Female"),()=>onChange(g));
+    b.style.border=`2px solid ${active?"#16a34a":"#e5e7eb"}`;
+    b.style.background=active?"#f0fdf4":"#fff";b.style.color=active?"#16a34a":"#6b7280";
+    row.appendChild(b);
+  });
+  return row;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────
+function render(){
+  const phone=document.getElementById("phone");
+  phone.innerHTML="";
+  const screen=document.createElement("div");screen.className="screen";
+  if(APP.screen==="setup") buildSetupScreen(screen);
+  else if(APP.screen==="login") buildLogin(screen);
+  else if(APP.screen==="forgot") buildForgot(screen);
+  else if(APP.screen==="student") buildStudentApp(screen);
+  else if(APP.screen==="staff") buildStaffApp(screen);
+  if(APP.toast){const t=el("div","toast",APP.toast);phone.appendChild(t);}
+  if(APP.saving){const s=el("div","saving","☁️ Saving…");phone.appendChild(s);}
+  if(APP.modal) buildModal(phone);
+  phone.appendChild(screen);
+}
+
+// ── SETUP SCREEN ───────────────────────────────────────────────
+let setupState = {
+  databaseURL: APP.fbConfig?.databaseURL||"",
+  error:"", testing:false, step: APP.fbConfig ? "ready" : "form"
+};
+
+function buildSetupScreen(screen) {
+  const S=setupState;
+
+  // If saved config exists, auto-connect
+  if(S.step==="ready" && APP.fbConfig) {
+    const top=div("login-top");
+    top.innerHTML=`<div class="c1"></div><div class="c2"></div><div style="font-size:48px;position:relative;z-index:1">🏛️</div><div style="color:#fff;font-weight:900;font-size:22px;position:relative;z-index:1;margin-top:4px">${CI.short}</div>`;
+    screen.appendChild(top);
+    const card=div("login-card");
+    const spin=div("spinner");card.appendChild(spin);
+    const msg=div("");msg.style.cssText="text-align:center;color:#6b7280;font-size:13px;margin-top:12px;";
+    msg.textContent="Connecting to database…";card.appendChild(msg);
+    screen.appendChild(card);
+    // Auto-connect
+    setTimeout(()=>{
+      const ok=initFirebase(APP.fbConfig);
+      if(ok){APP.screen="login";render();}
+      else{S.step="form";S.error="Saved config failed. Please re-enter.";render();}
+    },600);
+    return;
+  }
+
+  const top=div("login-top");
+  top.innerHTML=`<div class="c1"></div><div class="c2"></div><div style="font-size:40px;position:relative;z-index:1">🔥</div><div style="color:#fff;font-weight:900;font-size:20px;position:relative;z-index:1;margin-top:6px">Connect Firebase</div><div style="color:rgba(255,255,255,0.8);font-size:11px;position:relative;z-index:1;margin-top:3px">One-time setup to sync data across devices</div>`;
+  screen.appendChild(top);
+
+  const card=div("login-card");
+  const info=alertEl("blue","📋 Only your Firebase Database URL is needed — much simpler!");
+  info.style.marginBottom="14px";card.appendChild(info);
+
+  if(S.error){const e=div("err-box");e.textContent="⚠️ "+S.error;card.appendChild(e);}
+
+  // Only need Database URL for REST API!
+  const urlInp=inp("https://act-portal-default-rtdb.firebaseio.com",S.databaseURL||"",e=>{setupState.databaseURL=e.target.value;S.error="";});
+  const urlFg=fieldRow("🔥 Firebase Database URL",true,urlInp);
+  const urlHelp=div("");urlHelp.style.cssText="font-size:11px;color:#6b7280;margin-top:-8px;margin-bottom:12px;line-height:1.6;";
+  urlHelp.innerHTML="Find this in Firebase Console →<br>Realtime Database → Copy the URL at top<br><strong style=\"color:#374151\">Looks like: https://YOUR-PROJECT-default-rtdb.firebaseio.com</strong>";
+  card.appendChild(urlFg);card.appendChild(urlHelp);
+
+  const connectBtn=btn("login-btn",S.testing?"Testing connection…":"🔥 Connect & Start",()=>{
+    const url=S.databaseURL.trim();
+    if(!url||!url.startsWith("https")){S.error="Please enter your Firebase Database URL (starts with https://)";render();return;}
+    S.testing=true;render();
+    const cfg={databaseURL:url};
+    // Test by fetching root
+    fetch(url+"/.json?shallow=true").then(r=>{
+      if(r.ok||r.status===401||r.status===403){
+        // URL is valid (401/403 means rules issue not URL issue)
+        localStorage.setItem("act_fb_config",JSON.stringify(cfg));
+        APP.fbConfig=cfg;
+        const ok=initFirebase(cfg);
+        if(ok){APP.screen="login";showToast("🔥 Firebase connected!");render();}
+        else{S.error="Could not connect. Please check URL.";S.testing=false;render();}
+      } else {
+        S.error="Invalid Database URL. Please check and try again.";S.testing=false;render();
+      }
+    }).catch(()=>{
+      // Try anyway - might be CORS but URL could be valid
+      localStorage.setItem("act_fb_config",JSON.stringify(cfg));
+      APP.fbConfig=cfg;
+      const ok=initFirebase(cfg);
+      if(ok){APP.screen="login";showToast("🔥 Connected!");render();}
+      else{S.error="Could not connect. Check your Database URL.";S.testing=false;render();}
+    });
+  });
+  if(S.testing)connectBtn.style.opacity="0.7";
+  card.appendChild(connectBtn);
+
+  const helpBtn=btn("forgot-link","📖 How to get Firebase config →",()=>{
+    window.open("https://console.firebase.google.com","_blank");
+  });
+  card.appendChild(helpBtn);
+
+  screen.appendChild(card);
+}
+
+// ── LOGIN ──────────────────────────────────────────────────────
+let loginState={email:"",password:"",showPass:false,error:"",loading:false,role:"student"};
+
+function buildLogin(screen){
+  const S=loginState;
+  const top=div("");
+  top.style.cssText="padding:0;position:relative;overflow:hidden;flex-shrink:0;";
+  top.innerHTML=`<img src="data:image/webp;base64,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" style="width:100%;height:200px;object-fit:cover;display:block;" alt="ACT"/><div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.65) 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:16px 20px;"><div style="color:#fff;font-weight:900;font-size:19px;text-shadow:0 2px 8px rgba(0,0,0,0.6)">${CI.name}</div><div style="color:rgba(255,255,255,0.9);font-size:10px;margin-top:2px;font-style:italic;text-shadow:0 1px 4px rgba(0,0,0,0.5)">${CI.tagline}</div></div>`;
+  screen.appendChild(top);
+  const card=div("login-card");
+
+
+
+  card.innerHTML+=`<div style="font-weight:800;font-size:20px;margin-bottom:2px">Welcome Back 👋</div><div style="color:#6b7280;font-size:13px;margin-bottom:16px">Sign in to your account</div>`;
+
+  const rt=div("role-toggle");
+  rt.appendChild(btn("role-btn"+(S.role==="student"?" active":""),"👨‍🎓 Student",()=>{S.role="student";S.error="";render();}));
+  rt.appendChild(btn("role-btn"+(S.role==="staff"?" active":""),"👩‍🏫 Staff",()=>{S.role="staff";S.error="";render();}));
+  card.appendChild(rt);
+
+  const emailInp=document.createElement("input");emailInp.type="email";emailInp.placeholder="Email Address";emailInp.value=S.email;
+  css(emailInp,{flex:"1",border:"none",background:"transparent",padding:"12px 0",fontSize:"14px",color:"#111"});
+  emailInp.oninput=e=>{S.email=e.target.value;S.error="";};
+  card.appendChild(loginField("Email Address","✉️",emailInp));
+
+  const passInp=document.createElement("input");passInp.type=S.showPass?"text":"password";passInp.placeholder="Password";passInp.value=S.password;
+  css(passInp,{flex:"1",border:"none",background:"transparent",padding:"12px 0",fontSize:"14px",color:"#111",outline:"none"});
+  passInp.oninput=e=>{S.password=e.target.value;S.error="";};
+  passInp.onkeydown=e=>{if(e.key==="Enter")doLogin();};
+  const eyeBtn=btn("eye-btn",S.showPass?"🙈":"👁️",()=>{S.showPass=!S.showPass;render();});
+  const pw=div("field"),pl=div("field-label"),pi=div("field-inner");
+  pl.textContent="Password";pi.appendChild(span("field-icon","🔒"));pi.appendChild(passInp);pi.appendChild(eyeBtn);
+  pw.appendChild(pl);pw.appendChild(pi);card.appendChild(pw);
+
+  card.appendChild(btn("forgot-link","Forgot Password?",()=>{APP.screen="forgot";render();}));
+  if(S.error){const e=div("err-box");e.textContent="⚠️ "+S.error;card.appendChild(e);}
+
+  const lb=btn("login-btn",S.loading?"Signing in…":"Sign In →",doLogin);
+  if(S.loading)lb.style.opacity="0.7";
+  card.appendChild(lb);
+
+
+
+
+
+  screen.appendChild(card);
+}
+
+async function doLogin(){
+  const S=loginState;S.error="";
+  if(!S.email||!S.password){S.error="Please enter email and password.";render();return;}
+  S.loading=true;render();
+
+  const email=S.email.toLowerCase().trim();
+  const pass=S.password;
+  const role=S.role;
+
+  // 1. Always check hardcoded staff first (no Firebase needed)
+  let u=HARDCODED_STAFF.find(u=>u.email===email&&u.password===pass&&u.role===role);
+
+  // 2. Fetch FRESH data from Firebase directly — don't rely on cached APP.students
+  if(!u){
+    try{
+      // Fetch all students fresh from Firebase
+      const res=await fetch(FB_URL+"/students.json");
+      if(res.ok){
+        const data=await res.json();
+        if(data){
+          APP.students=data;
+          const all=Object.values(data);
+          u=all.find(s=>s.email===email&&s.password===pass&&s.role===role);
+        }
+      }
+    }catch(e){console.log("Firebase fetch error:",e);}
+  }
+
+  // 3. Check DB staff (also fetch fresh)
+  if(!u){
+    try{
+      const res=await fetch(FB_URL+"/staff.json");
+      if(res.ok){
+        const data=await res.json();
+        if(data){
+          APP.staffList=data;
+          const all=Object.values(data);
+          u=all.find(s=>s.email===email&&s.password===pass&&s.role===role);
+        }
+      }
+    }catch(e){console.log("Firebase staff fetch error:",e);}
+  }
+
+  if(u){
+    APP.authUser=u;
+    APP.screen=u.role==="student"?"student":"staff";
+    loginState={email:"",password:"",showPass:false,error:"",loading:false,role:"student"};
+  } else {
+    S.error="Invalid credentials. Please try again.";
+    S.loading=false;
+  }
+  render();
+}
+
+// ── FORGOT ─────────────────────────────────────────────────────
+let forgotState={email:"",sent:false,error:"",loading:false};
+function buildForgot(screen){
+  const S=forgotState;
+  const top=div("login-top");css(top,{minHeight:"160px"});
+  top.innerHTML=`<div class="c1"></div><div class="c2"></div><div style="font-size:48px;position:relative;z-index:1">🔐</div><div style="color:#fff;font-weight:900;font-size:22px;position:relative;z-index:1;margin-top:6px">Reset Password</div>`;
+  screen.appendChild(top);
+  const card=div("login-card");
+  if(!S.sent){
+    card.innerHTML=`<div style="font-weight:800;font-size:18px;margin-bottom:4px">Forgot Password?</div><div style="color:#6b7280;font-size:13px;margin-bottom:14px">Enter your registered email to receive a reset link.</div>`;
+    const ei=document.createElement("input");ei.type="email";ei.placeholder="Email Address";ei.value=S.email;
+    css(ei,{flex:"1",border:"none",background:"transparent",padding:"12px 0",fontSize:"14px",color:"#111",outline:"none"});
+    ei.oninput=e=>{S.email=e.target.value;S.error="";};
+    card.appendChild(loginField("Registered Email","✉️",ei));
+    if(S.error){const e=div("err-box");e.textContent="⚠️ "+S.error;card.appendChild(e);}
+    const sb=btn("login-btn",S.loading?"Sending…":"Send Reset Link",()=>{
+      if(!S.email){S.error="Enter your registered email.";render();return;}
+      S.loading=true;render();
+      setTimeout(()=>{
+        const exists=allUsers().find(u=>u.email===S.email.toLowerCase().trim());
+        if(exists){S.sent=true;showToast("📧 Password reset sent to "+S.email);}else{S.error="No account found with this email.";}
+        S.loading=false;render();
+      },800);
+    });
+    if(S.loading)sb.style.opacity="0.7";
+    card.appendChild(sb);
+  } else {
+    const ok=div("");ok.style.cssText="text-align:center;padding:20px 0;";
+    ok.innerHTML=`<div style="font-size:52px">📬</div><div style="font-weight:800;font-size:18px;margin-top:10px">Check your inbox!</div><div style="color:#6b7280;font-size:13px;margin-top:6px">A reset link was sent to <strong>${S.email}</strong></div>`;
+    card.appendChild(ok);
+  }
+  card.appendChild(btn("forgot-link","← Back to Login",()=>{forgotState={email:"",sent:false,error:"",loading:false};APP.screen="login";render();}));
+  screen.appendChild(card);
+}
+
+// ── STUDENT APP ────────────────────────────────────────────────
+let studentView="dashboard";
+function buildStudentApp(screen){
+  const user=APP.authUser;
+  const subs=APP.subjects;
+  const marks=resolveMarks(user.id);
+  const grades=APP.grades[user.id]||{};
+  const att=APP.attendance[user.id]!==undefined?APP.attendance[user.id]:(user.attendance||85);
+  const gi=getGrade(marks);
+  const avg=subs.length?Math.round(Object.values(marks).reduce((a,b)=>a+b,0)/subs.length):0;
+  const fees=user.fees||{tuition:45000,hostel:30000,placement:5000,transport:12000};
+  const fp=user.feesPaid||{tuition:0,hostel:0,placement:0,transport:0};
+  const totalFees=fees.tuition+fees.hostel+fees.placement+fees.transport;
+  const totalPaid=fp.tuition+fp.hostel+fp.placement+fp.transport;
+  const pending=totalFees-totalPaid;
+
+  screen.appendChild(headerEl(CI.short,CI.name,()=>{APP.authUser=null;APP.screen="login";render();}));
+  screen.appendChild(profileCardEl(user,gi.grade,gi.color));
+  screen.appendChild(tabsEl(["dashboard","marks","attendance","fees"],["Home","Marks","Attend.","Fees"],studentView,v=>{studentView=v;render();}));
+
+  const scroll=div("scroll");
+
+  if(studentView==="dashboard"){
+    scroll.appendChild(secTitle("📊 Quick Overview"));
+    const grid=div("stat-grid");
+    grid.appendChild(statCard(att+"%","Attendance",getAttColor(att),att));
+    grid.appendChild(statCard(pending>0?"₹"+pending.toLocaleString():"✓ Paid","Fees Pending",pending>0?"#dc2626":"#16a34a"));
+    grid.appendChild(statCard(avg+"%","Avg Marks",gi.color,avg));
+    grid.appendChild(statCard(gi.grade,gi.label,gi.color));
+    scroll.appendChild(grid);
+    scroll.appendChild(secTitle("⚠️ Alerts"));
+    if(att<75)scroll.appendChild(alertEl("red","📉 Low attendance! Minimum 75% required."));
+    if(pending>0)scroll.appendChild(alertEl("yellow","💳 Fee of ₹"+pending.toLocaleString()+" is pending."));
+    if(gi.grade==="F")scroll.appendChild(alertEl("red","❌ Failed in one or more subjects."));
+    if(att>=75&&pending===0&&gi.grade!=="F")scroll.appendChild(alertEl("green","✅ All clear! You're in good academic standing."));
+    scroll.appendChild(secTitle("🔔 Notifications from Staff"));
+    const myNotifs=APP.notifications.filter(n=>n.studentId===user.id);
+    if(!myNotifs.length)scroll.appendChild(emptyMsg("No notifications yet."));
+    else myNotifs.forEach(n=>{
+      const isBroad=n.isBroadcast;
+      const nc=div("notif-card");
+      nc.style.background=isBroad?"#f0fdf4":"#eff6ff";
+      nc.style.border=isBroad?"1px solid #bbf7d0":"1px solid #bfdbfe";
+      nc.style.borderRadius="12px";
+      const ic=span("");ic.style.fontSize="22px";
+      ic.textContent=isBroad?(n.msgType==="exam"?"📝":n.msgType==="holiday"?"🎉":n.msgType==="fees"?"💳":n.msgType==="event"?"🎊":"📢"):"📊";
+      const info=div("");info.style.flex="1";
+      if(isBroad){
+        info.innerHTML=`<div style="font-weight:700;font-size:13px">${n.subject||"Announcement"}</div><div style="font-size:10px;color:#6b7280;margin-bottom:4px">From ${n.from||"Staff"} • ${new Date(n.time).toLocaleString()}</div><div style="font-size:12px;color:#374151;line-height:1.5">${n.message||""}</div>`;
+      } else {
+        info.innerHTML=`<div style="font-weight:600;font-size:12px">📊 Marks updated by staff</div><div style="font-size:10px;color:#6b7280">${new Date(n.time).toLocaleString()}</div>`;
+      }
+      nc.appendChild(ic);nc.appendChild(info);scroll.appendChild(nc);
+    });
+  }
+
+  if(studentView==="marks"){
+    scroll.appendChild(secTitle("📝 Semester Marks"));
+    const hrow=div("");css(hrow,{display:"flex",alignItems:"center",gap:"6px",marginBottom:"6px"});
+    hrow.innerHTML=`<div style="width:84px;font-size:10px;font-weight:700;color:#9ca3af">SUBJECT</div><div style="flex:1;font-size:10px;font-weight:700;color:#9ca3af">SCORE</div><div style="width:46px;font-size:10px;font-weight:700;color:#9ca3af;text-align:right">MARKS</div><div style="width:36px;font-size:10px;font-weight:700;color:#9ca3af;text-align:center">GRD</div>`;
+    scroll.appendChild(hrow);
+    subs.forEach(sub=>{
+      const score=marks[sub]||0,failed=!isPass(score);
+      const col=failed?"#dc2626":score>=80?"#16a34a":"#2563eb";
+      const sg=grades[sub]||scoreToGrade(score),gc=GRADE_COLORS[sg]||"#6b7280";
+      const row=div("mark-row");row.style.background=failed?"#fef2f2":"#fff";row.style.border=failed?"1px solid #fca5a5":"1px solid transparent";
+      const subEl=div("mark-sub");subEl.textContent=sub;subEl.style.color=failed?"#dc2626":"#374151";
+      const bw=div("mark-bar-wrap"),bf=div("mark-bar-fill");bf.style.width=score+"%";bf.style.background=col;bw.appendChild(bf);
+      const sc=div("");sc.style.cssText=`width:46px;font-size:11px;font-weight:700;text-align:right;color:${col};`;sc.textContent=score+"/100";
+      const gw=div("");css(gw,{width:"36px",display:"flex",justifyContent:"center"});
+      const gb=div("");gb.style.cssText=`background:${gc};color:#fff;font-weight:800;font-size:10px;border-radius:6px;padding:3px 6px;min-width:28px;text-align:center;`;gb.textContent=sg;
+      gw.appendChild(gb);row.appendChild(subEl);row.appendChild(bw);row.appendChild(sc);row.appendChild(gw);
+      if(failed){const f=div("");f.style.cssText="font-size:9px;color:#dc2626;font-weight:800;margin-left:2px;";f.textContent="FAIL";row.appendChild(f);}
+      scroll.appendChild(row);
+    });
+    const result=div("");result.style.cssText=`background:${gi.grade==="F"?"#fef2f2":"#f0fdf4"};border:1px solid ${gi.grade==="F"?"#fca5a5":"#bbf7d0"};border-radius:12px;padding:12px;margin-top:8px;font-size:13px;`;
+    result.innerHTML=`<div>Average: <strong>${avg}%</strong></div><div style="color:${gi.color};font-weight:700">Overall Grade ${gi.grade} — ${gi.label}</div>`;
+    scroll.appendChild(result);
+  }
+
+  if(studentView==="attendance"){
+    scroll.appendChild(secTitle("📅 Attendance Report"));
+    const ring=div("att-ring");ring.style.border=`6px solid ${getAttColor(att)}`;
+    ring.innerHTML=`<div style="font-size:28px;font-weight:900;color:${getAttColor(att)}">${att}%</div><div style="font-size:11px;color:#6b7280">Present</div>`;
+    scroll.appendChild(ring);
+    const dc=div("detail-card");
+    [["Total Classes","120"],["Attended",""+Math.round(120*att/100)],["Absent",""+(120-Math.round(120*att/100))],["Required (75%)","90 classes"],["Status",att>=85?"Excellent ✅":att>=75?"Satisfactory":"⚠️ Low"]].forEach(([k,v])=>{
+      const dr=div("detail-row"),ks=span("",k),vs=document.createElement("strong");vs.textContent=v;
+      if(k==="Status")vs.style.color=getAttColor(att);dr.appendChild(ks);dr.appendChild(vs);dc.appendChild(dr);
+    });
+    scroll.appendChild(dc);
+  }
+
+  if(studentView==="fees"){
+    scroll.appendChild(secTitle("💳 Fee Details"));
+    [{key:"tuition",icon:"🎓",label:"Tuition Fee",color:"#16a34a"},{key:"hostel",icon:"🏠",label:"Hostel Fee",color:"#2563eb"},{key:"placement",icon:"💼",label:"Placement Fee",color:"#7c3aed"},{key:"transport",icon:"🚌",label:"Transport Fee",color:"#ea580c"}].forEach(({key,icon,label,color})=>{
+      const total=fees[key],paid=fp[key],due=total-paid;
+      const c=div("fee-cat"),top2=div("");css(top2,{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"});
+      top2.innerHTML=`<span style="font-size:22px">${icon}</span><div style="font-weight:700;font-size:13px;flex:1">${label}</div><div style="font-size:11px;font-weight:700;color:${due>0?"#dc2626":"#16a34a"}">${due>0?"₹"+due.toLocaleString()+" Due":"✓ Paid"}</div>`;
+      const bw=div("");css(bw,{height:"6px",background:"#e5e7eb",borderRadius:"4px",overflow:"hidden",marginBottom:"2px"});
+      const bf=div("");css(bf,{height:"100%",width:Math.min(100,(paid/total)*100)+"%",background:color,borderRadius:"4px"});bw.appendChild(bf);
+      const info2=div("");css(info2,{display:"flex",justifyContent:"space-between",fontSize:"11px",color:"#6b7280",marginTop:"6px"});
+      info2.innerHTML=`<span>Total: <strong>₹${total.toLocaleString()}</strong></span><span>Paid: <strong style="color:#16a34a">₹${paid.toLocaleString()}</strong></span><span>Due: <strong style="color:${due>0?"#dc2626":"#16a34a"}">₹${due.toLocaleString()}</strong></span>`;
+      c.appendChild(top2);c.appendChild(bw);c.appendChild(info2);scroll.appendChild(c);
+    });
+    const sum=div("");sum.style.cssText="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:12px 14px;";
+    sum.innerHTML=`<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>Grand Total</span><strong>₹${totalFees.toLocaleString()}</strong></div><div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>Total Paid</span><strong style="color:#16a34a">₹${totalPaid.toLocaleString()}</strong></div><div style="display:flex;justify-content:space-between;padding:8px 0 5px;border-top:1px solid #d1fae5;font-size:13px"><strong style="color:${pending>0?"#dc2626":"#16a34a"}">Pending</strong><strong style="color:${pending>0?"#dc2626":"#16a34a"}">${pending===0?"✓ Fully Paid":"₹"+pending.toLocaleString()}</strong></div>`;
+    scroll.appendChild(sum);
+  }
+
+  screen.appendChild(scroll);
+  screen.appendChild(bottomNavEl([{icon:"🏠",label:"Home",v:"dashboard"},{icon:"📝",label:"Marks",v:"marks"},{icon:"📅",label:"Attend.",v:"attendance"},{icon:"💳",label:"Fees",v:"fees"}],studentView,v=>{studentView=v;render();}));
+}
+
+// ── STAFF APP ──────────────────────────────────────────────────
+function buildStaffApp(screen){
+  const user=APP.authUser,view=APP.staffView;
+  screen.appendChild(headerEl("Staff Portal",user.name+" • "+(user.department||"IT"),()=>{APP.authUser=null;APP.screen="login";render();}));
+  screen.appendChild(profileCardEl(user,"STAFF","#16a34a",12));
+  screen.appendChild(tabsEl(["upload","add","staff","subjects","students","log"],["Marks","Add","Staff","Subjects","Students","Log"],view,v=>{
+    APP.staffView=v;
+    if(v==="subjects"){APP.subjectDraft=[...APP.subjects];APP.subjectEditing=false;}
+    if(v==="add"){APP.addForm=emptyStudentForm();APP.addErrors={};}
+    if(v==="staff"){APP.staffForm=emptyStaffForm();APP.staffFormErrors={};APP.editingStaffId=null;}
+    // Auto-refresh data when switching to marks or students tab
+    if(v==="upload"||v==="students") loadAllData();
+    render();
+  }));
+  const scroll=div("scroll");
+  if(view==="upload")buildUploadView(scroll);
+  else if(view==="add")buildAddStudentView(scroll);
+  else if(view==="staff")buildStaffMgmtView(scroll);
+  else if(view==="subjects")buildSubjectsView(scroll);
+  else if(view==="students")buildStudentsView(scroll);
+  else if(view==="log")buildLogView(scroll);
+  screen.appendChild(scroll);
+  screen.appendChild(bottomNavEl([{icon:"📤",label:"Marks",v:"upload"},{icon:"➕",label:"Add",v:"add"},{icon:"👩‍🏫",label:"Staff",v:"staff"},{icon:"📚",label:"Subjects",v:"subjects"},{icon:"👨‍🎓",label:"Students",v:"students"},{icon:"📋",label:"Log",v:"log"}],view,v=>{
+    APP.staffView=v;
+    if(v==="subjects"){APP.subjectDraft=[...APP.subjects];APP.subjectEditing=false;}
+    if(v==="add"){APP.addForm=emptyStudentForm();APP.addErrors={};}
+    if(v==="staff"){APP.staffForm=emptyStaffForm();APP.staffFormErrors={};APP.editingStaffId=null;}
+    render();
+  }));
+}
+
+function buildUploadView(scroll){
+  scroll.appendChild(secTitle("📤 Upload & Send Marks"));
+
+
+  // Refresh button
+  const refreshRow=div("");css(refreshRow,{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"});
+  const countLbl=div("");countLbl.style.cssText="font-size:12px;color:#6b7280;font-weight:600;";
+  countLbl.textContent=`👨‍🎓 ${allStudents().length} student(s) loaded`;
+  const refreshBtn=btn("","🔄 Refresh",async()=>{
+    refreshBtn.textContent="⏳ Loading…";refreshBtn.disabled=true;
+    await loadAllData();
+    refreshBtn.textContent="🔄 Refresh";refreshBtn.disabled=false;
+    showToast("✅ Data refreshed!");
+  });
+  css(refreshBtn,{background:"#f0fdf4",border:"1.5px solid #86efac",borderRadius:"10px",padding:"6px 14px",fontSize:"12px",fontWeight:"700",color:"#15803d"});
+  refreshRow.appendChild(countLbl);refreshRow.appendChild(refreshBtn);scroll.appendChild(refreshRow);
+
+  const si=document.createElement("input");si.className="fi";si.placeholder="🔍 Search student…";si.value=APP.staffSearch;
+  css(si,{width:"100%",marginBottom:"10px",padding:"9px 12px",border:"1.5px solid #e5e7eb",borderRadius:"12px"});
+  si.oninput=e=>{APP.staffSearch=e.target.value;render();};scroll.appendChild(si);
+
+  const students=allStudents().filter(s=>s.name.toLowerCase().includes(APP.staffSearch.toLowerCase())||s.roll.toLowerCase().includes(APP.staffSearch.toLowerCase()));
+  if(!students.length){
+    const emptyBox=div("");css(emptyBox,{textAlign:"center",padding:"30px 20px"});
+    emptyBox.innerHTML=`<div style="font-size:40px;margin-bottom:10px">👨‍🎓</div><div style="font-weight:700;font-size:14px;color:#374151;margin-bottom:6px">No students found</div><div style="font-size:12px;color:#6b7280;margin-bottom:16px">Add students from the ➕ Add tab, then tap Refresh</div>`;
+    const addBtn2=btn("action-btn","➕ Go to Add Student",()=>{APP.staffView="add";APP.addForm=emptyStudentForm();APP.addErrors={};render();});
+    emptyBox.appendChild(addBtn2);scroll.appendChild(emptyBox);return;
+  }
+
+  students.forEach(student=>{
+    const cm=resolveMarks(student.id),cg=APP.grades[student.id]||{};
+    const c=div("staff-card");
+    const top=div("");css(top,{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"});
+    top.innerHTML=`<span style="font-size:28px">${student.photo}</span><div><div style="font-weight:700;font-size:14px">${student.name}</div><div style="font-size:11px;color:#6b7280">${student.roll} • ${student.semester}</div></div>`;
+    c.appendChild(top);
+
+    APP.subjects.forEach(sub=>{
+      const score=cm[sub]!==undefined?cm[sub]:"";
+      const ag=scoreToGrade(typeof score==="number"?score:0);
+      const sg=(cg[sub])||ag;
+      const row=div("sub-row");
+      const lbl=div("sub-row-label");lbl.textContent=sub;
+      const si2=document.createElement("input");si2.className="sub-row-input";si2.type="number";si2.min="0";si2.max="100";si2.placeholder="0-100";si2.value=score;
+      si2.onchange=async e=>{
+        const val=Math.min(100,Math.max(0,parseInt(e.target.value)||0));
+        e.target.value=val;
+        const ag2=scoreToGrade(val);
+        await dbUpdate(`marks/${student.id}`,{[sub]:val});
+        if(!(APP.grades[student.id]&&APP.grades[student.id][sub+"_manual"])){
+          await dbUpdate(`grades/${student.id}`,{[sub]:ag2});
+        }
+      };
+      const sel=document.createElement("select");sel.className="grade-select";sel.style.background=GRADE_COLORS[sg]||"#6b7280";
+      GRADE_OPTIONS.forEach(g=>{const o=document.createElement("option");o.value=g;o.textContent=g;if(g===sg)o.selected=true;sel.appendChild(o);});
+      sel.onchange=async e=>{
+        await dbUpdate(`grades/${student.id}`,{[sub]:e.target.value,[sub+"_manual"]:true});
+        e.target.style.background=GRADE_COLORS[e.target.value]||"#6b7280";
+      };
+      row.appendChild(lbl);row.appendChild(si2);row.appendChild(sel);c.appendChild(row);
+    });
+
+    // Save all marks button
+    const saveBtn=btn("","💾 Save All Marks",async()=>{
+      const inputs=c.querySelectorAll(".sub-row-input");
+      const marksData={};const gradesData={};
+      APP.subjects.forEach((sub,i)=>{
+        const val=Math.min(100,Math.max(0,parseInt(inputs[i]?.value)||0));
+        marksData[sub]=val;
+        if(!(APP.grades[student.id]&&APP.grades[student.id][sub+"_manual"])){gradesData[sub]=scoreToGrade(val);}
+      });
+      await dbSet(`marks/${student.id}`,marksData);
+      if(Object.keys(gradesData).length)await dbUpdate(`grades/${student.id}`,gradesData);
+      showToast("✅ "+student.name+"'s marks saved to Firebase!");
+    });
+    css(saveBtn,{width:"100%",background:"#f0fdf4",border:"1.5px solid #86efac",borderRadius:"10px",padding:"8px",fontSize:"12px",fontWeight:"700",color:"#15803d",marginBottom:"6px"});
+
+  
+    c.appendChild(saveBtn);scroll.appendChild(c);
+  });
+}
+
+function openSendModal(student,type){APP.modal={student,type};render();}
+
+function buildModal(phone){
+  const{student,type}=APP.modal;
+  const marks=resolveMarks(student.id);
+  const overlay=div("overlay"),modal=div("modal");
+  const preview=Object.entries(marks).map(([s,v])=>`${s}:${v}/100`).join(", ");
+  modal.innerHTML=`<div style="font-weight:800;font-size:16px;margin-bottom:10px">${type==="whatsapp"?"💬 WhatsApp":"📱 SMS"} — Confirm</div><div style="font-size:13px;color:#374151;margin-bottom:4px">Send <strong>${student.name}</strong>'s marks to parent?</div><div style="font-size:12px;color:#6b7280;margin-bottom:12px">📞 ${student.parentPhone}</div><div style="background:#f0fdf4;border-radius:10px;padding:10px"><div style="font-weight:700;font-size:11px;margin-bottom:4px">Message Preview</div><div style="font-size:11px;color:#374151;line-height:1.5">Dear Parent, ${student.name}'s marks: ${preview}. — ACT</div></div>`;
+  const btns=div("");css(btns,{display:"flex",gap:"10px",marginTop:"16px"});
+  const cancel=btn("","Cancel",()=>{APP.modal=null;render();});css(cancel,{flex:"1",background:"#f3f4f6",border:"none",borderRadius:"12px",padding:"12px",fontWeight:"600"});
+  const send=btn("",type==="whatsapp"?"Send via WhatsApp ✓":"Send via SMS ✓",async()=>{
+    const grades=APP.grades[student.id]||{},mwg={};
+    APP.subjects.forEach(sub=>{const sc=marks[sub]||0;mwg[sub]={score:sc,grade:grades[sub]||scoreToGrade(sc)};});
+    await dbPush("notifications",{studentId:student.id,student:student.name,type,time:Date.now(),marks,marksWithGrades:mwg});
+    APP.modal=null;showToast(`✅ Marks sent via ${type==="whatsapp"?"WhatsApp":"SMS"} to ${student.name}'s parent!`);render();
+  });
+  css(send,{flex:"1",background:type==="whatsapp"?"#25D366":"#2563eb",color:"#fff",border:"none",borderRadius:"12px",padding:"12px",fontWeight:"700"});
+  btns.appendChild(cancel);btns.appendChild(send);modal.appendChild(btns);overlay.appendChild(modal);
+  overlay.onclick=e=>{if(e.target===overlay){APP.modal=null;render();}};
+  phone.appendChild(overlay);
+}
+
+function buildAddStudentView(scroll){
+  const af=APP.addForm,ae=APP.addErrors;
+  scroll.appendChild(secTitle("➕ Add New Student"));
+
+  const nameInp=inp("e.g. Ravi Kumar",af.name,e=>{APP.addForm.name=e.target.value;});
+  if(ae.name)nameInp.style.borderColor="#fca5a5";
+  scroll.appendChild(fieldRow("Full Name",true,nameInp,ae.name));
+
+  const twoCol=div("");css(twoCol,{display:"flex",gap:"10px"});
+  const rollInp=inp("IT2021025",af.roll,e=>{APP.addForm.roll=e.target.value;});
+  if(ae.roll)rollInp.style.borderColor="#fca5a5";
+  const rollFg=fieldRow("Roll No",true,rollInp,ae.roll);rollFg.style.flex="1";
+  const semSel=document.createElement("select");semSel.className="fi";
+  ["Semester 1","Semester 2","Semester 3","Semester 4","Semester 5","Semester 6","Semester 7","Semester 8"].forEach(s=>{const o=document.createElement("option");o.value=s;o.textContent=s;if(s===af.semester)o.selected=true;semSel.appendChild(o);});
+  semSel.onchange=e=>APP.addForm.semester=e.target.value;
+  const semFg=fieldRow("Semester",false,semSel);semFg.style.flex="1";
+  twoCol.appendChild(rollFg);twoCol.appendChild(semFg);scroll.appendChild(twoCol);
+
+  const gFg=div("fg");gFg.appendChild(div("fl"));gFg.children[0].textContent="Gender";
+  gFg.appendChild(genderToggle(af.gender,g=>{APP.addForm.gender=g;render();},"👨‍🎓 Male","👩‍🎓 Female"));
+  scroll.appendChild(gFg);
+
+  const emailInp=inp("student@act.edu",af.email,e=>{APP.addForm.email=e.target.value;},"email");
+  if(ae.email)emailInp.style.borderColor="#fca5a5";
+  scroll.appendChild(fieldRow("Login Email",true,emailInp,ae.email));
+
+  const passInp=inp("Min 4 characters",af.password,e=>{APP.addForm.password=e.target.value;});
+  if(ae.password)passInp.style.borderColor="#fca5a5";
+  scroll.appendChild(fieldRow("Login Password",true,passInp,ae.password));
+
+  const ppInp=inp("+91 99999 88888",af.parentPhone,e=>{APP.addForm.parentPhone=e.target.value;});
+  if(ae.parentPhone)ppInp.style.borderColor="#fca5a5";
+  scroll.appendChild(fieldRow("Parent Phone",true,ppInp,ae.parentPhone));
+
+  const attInp=inp("85",af.attendance,e=>{APP.addForm.attendance=e.target.value;},"number");
+  scroll.appendChild(fieldRow("Starting Attendance %",false,attInp));
+
+  const feeBox=div("");css(feeBox,{background:"#f9fafb",border:"1px solid #e5e7eb",borderRadius:"12px",padding:"12px",marginBottom:"12px"});
+  const feeTitle=div("");feeTitle.innerHTML=`<div style="font-weight:700;font-size:12px;color:#374151;margin-bottom:4px">💳 Fee Structure</div><div style="font-size:11px;color:#6b7280;margin-bottom:10px">Set total fee and amount already paid for each category</div>`;
+  feeBox.appendChild(feeTitle);
+
+  // Header row
+  const feeHdr=div("");css(feeHdr,{display:"grid",gridTemplateColumns:"80px 1fr 1fr",gap:"6px",marginBottom:"6px"});
+  feeHdr.innerHTML=`<div style="font-size:10px;font-weight:700;color:#9ca3af"></div><div style="font-size:10px;font-weight:700;color:#374151;text-align:center">Total Fee (₹)</div><div style="font-size:10px;font-weight:700;color:#16a34a;text-align:center">Already Paid (₹)</div>`;
+  feeBox.appendChild(feeHdr);
+
+  [
+    {icon:"🎓",label:"Tuition",totalKey:"tuitionTotal",paidKey:"tuitionPaid",defaultTotal:"45000"},
+    {icon:"🏠",label:"Hostel",totalKey:"hostelTotal",paidKey:"hostelPaid",defaultTotal:"30000"},
+    {icon:"💼",label:"Placement",totalKey:"placementTotal",paidKey:"placementPaid",defaultTotal:"5000"},
+    {icon:"🚌",label:"Transport",totalKey:"transportTotal",paidKey:"transportPaid",defaultTotal:"12000"},
+  ].forEach(({icon,label,totalKey,paidKey,defaultTotal})=>{
+    const row=div("");css(row,{display:"grid",gridTemplateColumns:"80px 1fr 1fr",gap:"6px",alignItems:"center",marginBottom:"6px"});
+    const lbl=div("");lbl.style.cssText="font-size:11px;font-weight:600;color:#374151;display:flex;align-items:center;gap:4px;";
+    lbl.innerHTML=`${icon} ${label}`;
+    const ti=document.createElement("input");ti.type="number";ti.value=af[totalKey]||defaultTotal;ti.placeholder=defaultTotal;
+    css(ti,{border:"1.5px solid #e5e7eb",borderRadius:"8px",padding:"8px 6px",fontSize:"12px",fontWeight:"700",textAlign:"center",outline:"none",width:"100%"});
+    ti.oninput=e=>{APP.addForm[totalKey]=e.target.value;};
+    const pi=document.createElement("input");pi.type="number";pi.value=af[paidKey]||"";pi.placeholder="0";
+    css(pi,{border:"1.5px solid #86efac",borderRadius:"8px",padding:"8px 6px",fontSize:"12px",fontWeight:"700",color:"#15803d",textAlign:"center",outline:"none",width:"100%"});
+    pi.oninput=e=>{APP.addForm[paidKey]=e.target.value;};
+    row.appendChild(lbl);row.appendChild(ti);row.appendChild(pi);
+    feeBox.appendChild(row);
+  });
+  scroll.appendChild(feeBox);
+
+  const addBtn=btn("action-btn","✅ Add Student",async()=>{
+    const af2=APP.addForm,errs={};
+    if(!af2.name.trim())errs.name="Name required";
+    if(!af2.roll.trim())errs.roll="Roll number required";
+    if(!af2.email.trim())errs.email="Email required";
+    else if(!af2.email.includes("@"))errs.email="Enter a valid email";
+    if(!af2.password.trim())errs.password="Password required";
+    else if(af2.password.length<4)errs.password="Min 4 characters";
+    if(!af2.parentPhone.trim())errs.parentPhone="Parent phone required";
+    const exists=allStudents().find(u=>u.email===af2.email.trim())||Object.values(APP.staffList).find(u=>u.email===af2.email.trim())||HARDCODED_STAFF.find(u=>u.email===af2.email.trim());
+    if(exists)errs.email="Email already exists";
+    const rollExists=allStudents().find(u=>u.roll===af2.roll.trim());
+    if(rollExists)errs.roll="Roll number already exists";
+    APP.addErrors=errs;
+    if(Object.keys(errs).length){render();return;}
+    const id="stu_"+Date.now();
+    const newStudent={id,role:"student",email:af2.email.trim().toLowerCase(),password:af2.password.trim(),name:af2.name.trim(),photo:af2.gender==="female"?"👩‍🎓":"👨‍🎓",semester:af2.semester,roll:af2.roll.trim(),attendance:parseInt(af2.attendance)||85,fees:{tuition:parseInt(af2.tuitionTotal)||45000,hostel:parseInt(af2.hostelTotal)||30000,placement:parseInt(af2.placementTotal)||5000,transport:parseInt(af2.transportTotal)||12000},feesPaid:{tuition:parseInt(af2.tuitionPaid)||0,hostel:parseInt(af2.hostelPaid)||0,placement:parseInt(af2.placementPaid)||0,transport:parseInt(af2.transportPaid)||0},parentPhone:af2.parentPhone.trim()};
+    await dbSet("students/"+id,newStudent);
+    // Init marks for all subjects
+    const initMarks={};APP.subjects.forEach(s=>{initMarks[s]=0;});
+    await dbSet("marks/"+id,initMarks);
+    APP.addForm=emptyStudentForm();APP.addErrors={};
+    showToast("✅ "+af2.name.trim()+" added to Firebase!");render();
+  });
+  scroll.appendChild(addBtn);
+
+  if(allStudents().length){
+    scroll.appendChild(secTitle(`👨‍🎓 All Students (${allStudents().length})`));
+    allStudents().forEach(s=>{
+      const c=div("");css(c,{display:"flex",alignItems:"center",gap:"10px",background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:"12px",padding:"10px 12px",marginBottom:"8px"});
+      c.innerHTML=`<span style="font-size:24px">${s.photo}</span><div style="flex:1"><div style="font-weight:700;font-size:13px">${s.name}</div><div style="font-size:10px;color:#6b7280">${s.roll} • ${s.semester}</div><div style="font-size:10px;color:#16a34a">${s.email}</div></div>`;
+      const db2=btn("","🗑️",async()=>{await dbRemove("students/"+s.id);await dbRemove("marks/"+s.id);await dbRemove("grades/"+s.id);await dbRemove("attendance/"+s.id);showToast("🗑️ Student removed.");render();});
+      css(db2,{background:"#fef2f2",border:"1px solid #fca5a5",color:"#dc2626",borderRadius:"8px",padding:"4px 8px",fontSize:"11px",fontWeight:"700"});
+      c.appendChild(db2);scroll.appendChild(c);
+    });
+  }
+}
+
+function buildStaffMgmtView(scroll){
+  const sf=APP.staffForm,se=APP.staffFormErrors,esid=APP.editingStaffId;
+  scroll.appendChild(secTitle("👩‍🏫 Staff Management"));
+  const formBox=div("");css(formBox,{background:"#f9fafb",border:"1px solid #e5e7eb",borderRadius:"14px",padding:"12px 14px",marginBottom:"14px"});
+  const ftitle=div("");css(ftitle,{fontWeight:"700",fontSize:"13px",color:"#374151",marginBottom:"12px"});ftitle.textContent=esid!==null?"✏️ Edit Staff":"➕ Add New Staff";
+  formBox.appendChild(ftitle);
+
+  const nameInp=inp("e.g. Dr. Ravi Kumar",sf.name,e=>{APP.staffForm.name=e.target.value;});if(se.name)nameInp.style.borderColor="#fca5a5";
+  formBox.appendChild(fieldRow("Full Name",true,nameInp,se.name));
+  const gFg=div("fg");gFg.appendChild(div("fl"));gFg.children[0].textContent="Gender";
+  gFg.appendChild(genderToggle(sf.gender,g=>{APP.staffForm.gender=g;render();}));formBox.appendChild(gFg);
+  const deptInp=inp("e.g. IT",sf.department,e=>{APP.staffForm.department=e.target.value;});if(se.department)deptInp.style.borderColor="#fca5a5";
+  formBox.appendChild(fieldRow("Department",true,deptInp,se.department));
+  const emailInp=inp("staff@act.edu",sf.email,e=>{APP.staffForm.email=e.target.value;});if(se.email)emailInp.style.borderColor="#fca5a5";
+  formBox.appendChild(fieldRow("Login Email",true,emailInp,se.email));
+  const passInp=inp("Min 4 characters",sf.password,e=>{APP.staffForm.password=e.target.value;});if(se.password)passInp.style.borderColor="#fca5a5";
+  formBox.appendChild(fieldRow("Password",true,passInp,se.password));
+
+  const btnRow=div("");css(btnRow,{display:"flex",gap:"10px"});
+  if(esid!==null){const cb=btn("","Cancel",()=>{APP.editingStaffId=null;APP.staffForm=emptyStaffForm();APP.staffFormErrors={};render();});css(cb,{flex:"1",background:"#f3f4f6",border:"none",borderRadius:"12px",padding:"12px",fontWeight:"600",fontSize:"13px"});btnRow.appendChild(cb);}
+  const sb=btn("action-btn",esid!==null?"✅ Save Changes":"➕ Add Staff",async()=>{
+    const errs={};
+    if(!sf.name.trim())errs.name="Name required";if(!sf.email.trim())errs.email="Email required";
+    if(!sf.password.trim())errs.password="Password required";else if(sf.password.length<4)errs.password="Min 4 characters";
+    if(!sf.department.trim())errs.department="Department required";
+    APP.staffFormErrors=errs;if(Object.keys(errs).length){render();return;}
+    const photo=sf.gender==="female"?"👩‍🏫":"👨‍🏫";
+    const id=esid||"stf_"+Date.now();
+    await dbSet("staff/"+id,{id,role:"staff",name:sf.name.trim(),email:sf.email.trim(),password:sf.password.trim(),department:sf.department.trim(),photo});
+    if(APP.authUser.id===esid)Object.assign(APP.authUser,{name:sf.name.trim(),email:sf.email.trim(),department:sf.department.trim()});
+    APP.staffForm=emptyStaffForm();APP.staffFormErrors={};APP.editingStaffId=null;
+    showToast("✅ Staff "+(esid?"updated":"added")+"!");render();
+  });
+  css(sb,{flex:esid!==null?"2":"1",marginTop:"0"});btnRow.appendChild(sb);formBox.appendChild(btnRow);scroll.appendChild(formBox);
+
+  scroll.appendChild(secTitle(`👥 All Staff (${allStaff().length})`));
+  allStaff().forEach(s=>{
+    const isCur=APP.authUser.id===s.id;
+    const c=div("");css(c,{background:isCur?"#f0fdf4":"#f9fafb",border:`1.5px solid ${isCur?"#86efac":"#e5e7eb"}`,borderRadius:"14px",padding:"12px 14px",marginBottom:"10px"});
+    const row=div("");css(row,{display:"flex",alignItems:"center",gap:"10px"});
+    const photo=span("");photo.style.fontSize="28px";photo.textContent=s.photo;
+    const info=div("");info.style.flex="1";
+    const isHard=HARDCODED_STAFF.find(h=>h.id===s.id);
+    info.innerHTML=`<div style="display:flex;align-items:center;gap:5px"><div style="font-weight:700;font-size:14px">${s.name}</div>${isCur?'<span style="background:#16a34a;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px">YOU</span>':''}${!isHard?'<span style="background:#2563eb;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px">NEW</span>':''}</div><div style="font-size:11px;color:#6b7280">${s.department}</div><div style="font-size:11px;color:#16a34a;font-family:monospace">${s.email}</div>`;
+    const actions=div("");css(actions,{display:"flex",flexDirection:"column",gap:"6px"});
+    const eb=btn("","✏️ Edit",()=>{APP.editingStaffId=s.id;APP.staffForm={name:s.name,email:s.email,password:s.password||"",department:s.department,gender:s.photo==="👩‍🏫"?"female":"male"};APP.staffFormErrors={};render();});
+    css(eb,{background:"#eff6ff",border:"1px solid #bfdbfe",color:"#2563eb",borderRadius:"8px",padding:"5px 10px",fontSize:"11px",fontWeight:"700"});actions.appendChild(eb);
+    if(!isCur&&!isHard){const db2=btn("","🗑️",async()=>{await dbRemove("staff/"+s.id);showToast("🗑️ Staff removed.");render();});css(db2,{background:"#fef2f2",border:"1px solid #fca5a5",color:"#dc2626",borderRadius:"8px",padding:"5px 10px",fontSize:"11px",fontWeight:"700"});actions.appendChild(db2);}
+    row.appendChild(photo);row.appendChild(info);row.appendChild(actions);c.appendChild(row);scroll.appendChild(c);
+  });
+}
+
+function buildSubjectsView(scroll){
+  scroll.appendChild(secTitle("📚 Manage Subjects"));
+  const info2=div("");css(info2,{background:"#f9fafb",border:"1px solid #e5e7eb",borderRadius:"12px",padding:"10px",marginBottom:"12px",marginTop:"8px",fontSize:"11px",color:"#374151"});
+  info2.textContent="Add, remove or rename subjects. Min 1, max 12.";scroll.appendChild(info2);
+
+  if(!APP.subjectEditing){
+    const hdr=div("");css(hdr,{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"});
+    hdr.innerHTML=`<div style="font-size:12px;font-weight:600;color:#6b7280">Current Subjects</div><div style="background:#16a34a;color:#fff;font-size:11px;font-weight:700;border-radius:20px;padding:2px 10px">${APP.subjects.length} subjects</div>`;
+    scroll.appendChild(hdr);
+    APP.subjects.forEach((sub,i)=>{
+      const r=div("");css(r,{display:"flex",alignItems:"center",gap:"12px",background:"#f9fafb",border:"1.5px solid #e5e7eb",borderRadius:"12px",padding:"11px 14px",marginBottom:"8px"});
+      const num=div("");css(num,{width:"24px",height:"24px",background:"#16a34a",color:"#fff",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"11px",fontWeight:"800",flexShrink:"0"});num.textContent=i+1;
+      const name=div("");name.style.cssText="font-weight:600;font-size:14px;color:#111;flex:1;";name.textContent=sub;
+      r.appendChild(num);r.appendChild(name);scroll.appendChild(r);
+    });
+    scroll.appendChild(btn("action-btn","✏️ Edit / Add / Remove Subjects",()=>{APP.subjectDraft=[...APP.subjects];APP.subjectEditing=true;render();}));
+  } else {
+    const hdr=div("");css(hdr,{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"});
+    const addbtn=btn("","＋ Add",()=>{if(APP.subjectDraft.length>=12){showToast("⚠️ Max 12 subjects.");return;}APP.subjectDraft.push("");render();});
+    css(addbtn,{background:"#16a34a",color:"#fff",border:"none",borderRadius:"20px",padding:"5px 12px",fontSize:"12px",fontWeight:"700"});
+    hdr.innerHTML=`<div style="font-size:12px;font-weight:700">✏️ Edit Subjects</div>`;
+    const ctr=div("");css(ctr,{display:"flex",gap:"6px",alignItems:"center"});ctr.innerHTML=`<div style="font-size:11px;color:#6b7280">${APP.subjectDraft.length}/12</div>`;
+    ctr.appendChild(addbtn);hdr.appendChild(ctr);scroll.appendChild(hdr);
+
+    APP.subjectDraft.forEach((sub,i)=>{
+      const row=div("");css(row,{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"});
+      const num=div("");css(num,{width:"26px",height:"26px",background:"#16a34a",color:"#fff",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"11px",fontWeight:"800",flexShrink:"0"});num.textContent=i+1;
+      const fi2=document.createElement("input");fi2.style.cssText="flex:1;border:1.5px solid #d1d5db;border-radius:10px;padding:9px 12px;font-size:13px;outline:none;font-weight:500;";fi2.value=sub;fi2.placeholder=`Subject ${i+1}…`;
+      fi2.oninput=e=>{APP.subjectDraft[i]=e.target.value;};
+      const rm=btn("","✕",()=>{if(APP.subjectDraft.length<=1){showToast("⚠️ Min 1 subject.");return;}APP.subjectDraft.splice(i,1);render();});
+      css(rm,{width:"30px",height:"30px",background:"#fef2f2",border:"none",borderRadius:"50%",fontSize:"14px",color:"#dc2626",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:"0"});
+      row.appendChild(num);row.appendChild(fi2);row.appendChild(rm);scroll.appendChild(row);
+    });
+
+    const footer=div("");css(footer,{display:"flex",gap:"10px"});
+    const cb=btn("","Cancel",()=>{APP.subjectDraft=[...APP.subjects];APP.subjectEditing=false;render();});
+    css(cb,{flex:"1",background:"#f3f4f6",border:"none",borderRadius:"12px",padding:"12px",fontWeight:"600",fontSize:"13px"});
+    const sb=btn("","✅ Save to Firebase",async()=>{
+      const cleaned=APP.subjectDraft.map(s=>s.trim()).filter(Boolean);
+      if(!cleaned.length){showToast("⚠️ Need at least 1 subject.");return;}
+      if(new Set(cleaned).size!==cleaned.length){showToast("⚠️ Duplicate names.");return;}
+      await dbSet("subjects",cleaned);APP.subjectEditing=false;showToast(`✅ ${cleaned.length} subjects saved!`);render();
+    });
+    css(sb,{flex:"2",background:"linear-gradient(135deg,#16a34a,#15803d)",color:"#fff",border:"none",borderRadius:"12px",padding:"12px",fontWeight:"700",fontSize:"13px"});
+    footer.appendChild(cb);footer.appendChild(sb);scroll.appendChild(footer);
+  }
+}
+
+function buildStudentsView(scroll){
+  scroll.appendChild(secTitle("👨‍🎓 Students — Edit Attendance"));
+
+  // Refresh button
+  const refreshRow=div("");css(refreshRow,{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"8px 0 10px"});
+  const countLbl=div("");countLbl.style.cssText="font-size:12px;color:#6b7280;font-weight:600;";
+  countLbl.textContent=`👨‍🎓 ${allStudents().length} student(s)`;
+  const refreshBtn=btn("","🔄 Refresh",async()=>{
+    refreshBtn.textContent="⏳ Loading…";refreshBtn.disabled=true;
+    await loadAllData();refreshBtn.textContent="🔄 Refresh";refreshBtn.disabled=false;
+    showToast("✅ Refreshed!");
+  });
+  css(refreshBtn,{background:"#f0fdf4",border:"1.5px solid #86efac",borderRadius:"10px",padding:"6px 14px",fontSize:"12px",fontWeight:"700",color:"#15803d"});
+  refreshRow.appendChild(countLbl);refreshRow.appendChild(refreshBtn);scroll.appendChild(refreshRow);
+
+  const tip=div("");css(tip,{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:"12px",padding:"9px 12px",marginBottom:"12px",fontSize:"11px",color:"#374151"});
+  tip.textContent="📌 Use + / − or type to update attendance.";scroll.appendChild(tip);
+  if(!allStudents().length){
+    const emptyBox=div("");css(emptyBox,{textAlign:"center",padding:"30px 20px"});
+    emptyBox.innerHTML=`<div style="font-size:40px;margin-bottom:10px">👨‍🎓</div><div style="font-weight:700;font-size:14px;color:#374151;margin-bottom:6px">No students found</div><div style="font-size:12px;color:#6b7280;margin-bottom:16px">Add students from ➕ Add tab then tap Refresh</div>`;
+    const addBtn2=btn("action-btn","➕ Go to Add Student",()=>{APP.staffView="add";APP.addForm=emptyStudentForm();APP.addErrors={};render();});
+    emptyBox.appendChild(addBtn2);scroll.appendChild(emptyBox);return;
+  }
+
+  allStudents().forEach(s=>{
+    const m=resolveMarks(s.id),avg=APP.subjects.length?Math.round(Object.values(m).reduce((a,b)=>a+b,0)/APP.subjects.length):0;
+    const fees=s.fees||{tuition:45000,hostel:30000,placement:5000,transport:12000};
+    const fp=s.feesPaid||{tuition:0,hostel:0,placement:0,transport:0};
+    const totalFees=(fees.tuition||0)+(fees.hostel||0)+(fees.placement||0)+(fees.transport||0);
+    const totalPaid=(fp.tuition||0)+(fp.hostel||0)+(fp.placement||0)+(fp.transport||0);
+    const pending=totalFees-totalPaid;
+    const grade=getGrade(m);
+    const att=APP.attendance[s.id]!==undefined?APP.attendance[s.id]:(s.attendance||85);
+    const ac=getAttColor(att);
+    const setAtt=async val=>{await dbSet(`attendance/${s.id}`,Math.min(100,Math.max(0,Math.round(val))));};
+
+    const card=div("");css(card,{background:"#f9fafb",borderRadius:"14px",padding:"12px",marginBottom:"14px",border:"1px solid #e5e7eb"});
+
+    // Student info row
+    const infoRow=div("");css(infoRow,{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"});
+    infoRow.innerHTML=`<span style="font-size:30px">${s.photo}</span><div style="flex:1"><div style="font-weight:700;font-size:14px">${s.name}</div><div style="font-size:11px;color:#6b7280">${s.roll} • ${s.semester}</div></div>`;
+    const rightInfo=div("");css(rightInfo,{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"2px"});
+    rightInfo.innerHTML=`<span style="font-size:11px;color:${grade.color};font-weight:700">📝 ${avg}% (${grade.grade})</span><span style="font-size:11px;color:${pending?"#dc2626":"#16a34a"};font-weight:600">💳 ${pending?"₹"+pending.toLocaleString()+" due":"✓ Paid"}</span>`;
+    infoRow.appendChild(rightInfo);card.appendChild(infoRow);
+
+    // ── ATTENDANCE ──
+    const attBox=div("");css(attBox,{background:"#fff",borderRadius:"12px",padding:"10px 12px",border:`1.5px solid ${ac}30`,marginBottom:"10px"});
+    const ah=div("");css(ah,{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"});
+    ah.innerHTML=`<div style="font-size:12px;font-weight:700;color:#374151">📅 Attendance</div><div style="font-size:11px;color:${att<75?"#dc2626":"#16a34a"};font-weight:700">${att<75?"⚠️ Low":att>=85?"✅ Excellent":"✓ OK"}</div>`;
+    attBox.appendChild(ah);attBox.appendChild(progressBar(att,ac,8));
+    const controls=div("");css(controls,{display:"flex",alignItems:"center",gap:"8px",marginTop:"10px"});
+    const minusBtn=btn("","−",()=>setAtt(att-1));css(minusBtn,{width:"34px",height:"34px",borderRadius:"50%",border:"2px solid #e5e7eb",background:"#fff",fontSize:"18px",fontWeight:"700",color:"#dc2626",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:"0"});
+    const numWrap=div("");numWrap.style.cssText="flex:1;position:relative;";
+    const numInp=document.createElement("input");numInp.type="number";numInp.min="0";numInp.max="100";numInp.value=att;
+    css(numInp,{width:"100%",border:`2px solid ${ac}`,borderRadius:"10px",padding:"7px 32px 7px 10px",fontSize:"18px",fontWeight:"900",color:ac,textAlign:"center",background:"#fff",boxSizing:"border-box",outline:"none"});
+    numInp.onchange=e=>setAtt(parseFloat(e.target.value)||0);
+    const pct=span("");pct.style.cssText=`position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:14px;font-weight:700;color:${ac};`;pct.textContent="%";
+    numWrap.appendChild(numInp);numWrap.appendChild(pct);
+    const plusBtn=btn("","+",()=>setAtt(att+1));css(plusBtn,{width:"34px",height:"34px",borderRadius:"50%",border:"2px solid #e5e7eb",background:"#fff",fontSize:"18px",fontWeight:"700",color:"#16a34a",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:"0"});
+    controls.appendChild(minusBtn);controls.appendChild(numWrap);controls.appendChild(plusBtn);attBox.appendChild(controls);
+    const presets=div("");css(presets,{display:"flex",gap:"6px",marginTop:"10px",flexWrap:"wrap"});
+    [60,65,70,75,80,85,90,95,100].forEach(v=>{
+      const pb=btn("",""+v+"%",()=>setAtt(v));css(pb,{flex:"1",minWidth:"36px",border:"none",borderRadius:"8px",padding:"5px 2px",fontSize:"11px",fontWeight:"700",background:att===v?ac:"#f3f4f6",color:att===v?"#fff":"#6b7280"});
+      presets.appendChild(pb);
+    });
+    attBox.appendChild(presets);card.appendChild(attBox);
+
+    // ── FEES MANAGEMENT ──
+    const feesBox=div("");css(feesBox,{background:"#fff",borderRadius:"12px",padding:"10px 12px",border:"1.5px solid #fde68a"});
+    const fh=div("");css(fh,{marginBottom:"12px"});
+    fh.innerHTML=`<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">💳 Fees Management</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+  <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px;text-align:center;">
+    <div style="font-size:10px;color:#6b7280;font-weight:600;margin-bottom:4px">Total Fees</div>
+    <div style="font-size:16px;font-weight:900;color:#374151">₹${totalFees.toLocaleString()}</div>
+  </div>
+  <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:10px;text-align:center;">
+    <div style="font-size:10px;color:#6b7280;font-weight:600;margin-bottom:4px">Paid</div>
+    <div style="font-size:16px;font-weight:900;color:#16a34a">₹${totalPaid.toLocaleString()}</div>
+  </div>
+  <div style="background:${pending?"#fef2f2":"#f0fdf4"};border:1.5px solid ${pending?"#fca5a5":"#bbf7d0"};border-radius:12px;padding:10px;text-align:center;">
+    <div style="font-size:10px;color:#6b7280;font-weight:600;margin-bottom:4px">Pending</div>
+    <div style="font-size:16px;font-weight:900;color:${pending?"#dc2626":"#16a34a"}">${pending?"₹"+pending.toLocaleString():"✓ Nil"}</div>
+  </div>
+</div>`;
+    feesBox.appendChild(fh);
+
+    const feeItems=[
+      {key:"tuition",icon:"🎓",label:"Tuition"},
+      {key:"hostel",icon:"🏠",label:"Hostel"},
+      {key:"placement",icon:"💼",label:"Placement"},
+      {key:"transport",icon:"🚌",label:"Transport"},
+    ];
+    const feeEdits={
+      tuition_total:fees.tuition||45000, hostel_total:fees.hostel||30000,
+      placement_total:fees.placement||5000, transport_total:fees.transport||12000,
+      tuition_paid:fp.tuition||0, hostel_paid:fp.hostel||0,
+      placement_paid:fp.placement||0, transport_paid:fp.transport||0,
+    };
+
+    feeItems.forEach(({key,icon,label})=>{
+      const frow=div("");css(frow,{marginBottom:"8px",background:"#f9fafb",borderRadius:"10px",padding:"8px 10px"});
+      const ftop=div("");css(ftop,{display:"flex",alignItems:"center",gap:"6px",marginBottom:"6px"});
+      ftop.innerHTML=`<span style="font-size:16px">${icon}</span><div style="font-weight:700;font-size:12px;color:#374151">${label} Fee</div>`;
+      frow.appendChild(ftop);
+      const finpRow=div("");css(finpRow,{display:"flex",gap:"8px",alignItems:"flex-end"});
+
+      // Total
+      const tw=div("");tw.style.flex="1";
+      const tl=div("");tl.style.cssText="font-size:10px;color:#6b7280;font-weight:600;margin-bottom:3px;";tl.textContent="Total (₹)";
+      const ti=document.createElement("input");ti.type="number";ti.value=feeEdits[key+"_total"];
+      css(ti,{width:"100%",border:"1.5px solid #e5e7eb",borderRadius:"8px",padding:"7px 8px",fontSize:"12px",fontWeight:"700",background:"#fff",outline:"none"});
+      ti.oninput=e=>{feeEdits[key+"_total"]=parseInt(e.target.value)||0;};
+      tw.appendChild(tl);tw.appendChild(ti);
+
+      // Paid
+      const pw=div("");pw.style.flex="1";
+      const pl=div("");pl.style.cssText="font-size:10px;color:#16a34a;font-weight:600;margin-bottom:3px;";pl.textContent="Paid (₹)";
+      const pi=document.createElement("input");pi.type="number";pi.value=feeEdits[key+"_paid"];
+      css(pi,{width:"100%",border:"1.5px solid #86efac",borderRadius:"8px",padding:"7px 8px",fontSize:"12px",fontWeight:"700",background:"#fff",outline:"none",color:"#15803d"});
+      pi.oninput=e=>{feeEdits[key+"_paid"]=parseInt(e.target.value)||0;};
+      pw.appendChild(pl);pw.appendChild(pi);
+
+      // Due
+      const dw=div("");dw.style.cssText="flex:0 0 52px;text-align:center;";
+      const dl=div("");dl.style.cssText="font-size:10px;color:#6b7280;font-weight:600;margin-bottom:3px;";dl.textContent="Due";
+      const dv=div("");const dueAmt=(feeEdits[key+"_total"])-(feeEdits[key+"_paid"]);
+      dv.style.cssText=`font-size:11px;font-weight:800;color:${dueAmt>0?"#dc2626":"#16a34a"};padding:7px 0;`;
+      dv.textContent=dueAmt>0?"₹"+dueAmt.toLocaleString():"✓";
+      dw.appendChild(dl);dw.appendChild(dv);
+
+      finpRow.appendChild(tw);finpRow.appendChild(pw);finpRow.appendChild(dw);
+      frow.appendChild(finpRow);feesBox.appendChild(frow);
+    });
+
+    const saveFeeBtn=btn("","💾 Save Fees",async()=>{
+      const newFees={tuition:feeEdits.tuition_total,hostel:feeEdits.hostel_total,placement:feeEdits.placement_total,transport:feeEdits.transport_total};
+      const newPaid={tuition:feeEdits.tuition_paid,hostel:feeEdits.hostel_paid,placement:feeEdits.placement_paid,transport:feeEdits.transport_paid};
+      await dbUpdate("students/"+s.id,{fees:newFees,feesPaid:newPaid});
+      showToast("✅ "+s.name+"'s fees saved!");
+      await loadAllData();
+    });
+    css(saveFeeBtn,{width:"100%",marginTop:"10px",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"#fff",border:"none",borderRadius:"10px",padding:"10px",fontSize:"12px",fontWeight:"700"});
+    feesBox.appendChild(saveFeeBtn);
+    card.appendChild(feesBox);
+    scroll.appendChild(card);
+  });
+}
+
+function buildLogView(scroll){
+  scroll.appendChild(secTitle("📋 Notifications & Announcements"));
+
+  // ── SEND TO ALL STUDENTS BOX ──
+  const broadBox=div("");css(broadBox,{background:"#fff",border:"1.5px solid #16a34a",borderRadius:"14px",padding:"14px",marginBottom:"14px"});
+  const bTitle=div("");bTitle.innerHTML=`<div style="font-weight:800;font-size:14px;color:#374151;margin-bottom:4px">📢 Send Message to All Students</div><div style="font-size:11px;color:#6b7280;margin-bottom:10px">Message appears instantly in every student's dashboard 🔔</div>`;
+  broadBox.appendChild(bTitle);
+
+  // Message type toggle
+  const msgTypeRow=div("");css(msgTypeRow,{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"10px"});
+  let broadType="announcement";
+  const typeOpts=[{v:"announcement",label:"📢 Announcement"},{v:"exam",label:"📝 Exam Alert"},{v:"holiday",label:"🎉 Holiday"},{v:"fees",label:"💳 Fee Reminder"},{v:"event",label:"🎊 Event"}];
+  typeOpts.forEach(opt=>{
+    const tb=btn("",opt.label,()=>{
+      broadType=opt.v;
+      msgTypeRow.querySelectorAll("button").forEach(b=>{b.style.background="#f3f4f6";b.style.color="#6b7280";b.style.border="1.5px solid #e5e7eb";});
+      tb.style.background="#f0fdf4";tb.style.color="#16a34a";tb.style.border="1.5px solid #16a34a";
+    });
+    css(tb,{flex:"1",minWidth:"80px",background:broadType===opt.v?"#f0fdf4":"#f3f4f6",color:broadType===opt.v?"#16a34a":"#6b7280",border:`1.5px solid ${broadType===opt.v?"#16a34a":"#e5e7eb"}`,borderRadius:"8px",padding:"6px 4px",fontSize:"10px",fontWeight:"700"});
+    msgTypeRow.appendChild(tb);
+  });
+  broadBox.appendChild(msgTypeRow);
+
+  // Subject input
+  const subjInp=document.createElement("input");subjInp.placeholder="Subject (e.g. Exam Schedule, Fee Due Date…)";
+  css(subjInp,{width:"100%",border:"1.5px solid #e5e7eb",borderRadius:"10px",padding:"10px 12px",fontSize:"13px",marginBottom:"8px",outline:"none",boxSizing:"border-box"});
+  broadBox.appendChild(subjInp);
+
+  // Message textarea
+  const msgArea=document.createElement("textarea");msgArea.placeholder="Type your message here…";
+  css(msgArea,{width:"100%",border:"1.5px solid #e5e7eb",borderRadius:"10px",padding:"10px 12px",fontSize:"13px",minHeight:"90px",resize:"none",outline:"none",boxSizing:"border-box",fontFamily:"inherit",marginBottom:"10px"});
+  broadBox.appendChild(msgArea);
+
+  // Send button — in-app notification only
+  const sendBtn=btn("","🔔 Send Notification to All Students",async()=>{
+    const subj=subjInp.value.trim(),msg=msgArea.value.trim();
+    if(!msg){showToast("⚠️ Please type a message!");return;}
+    if(!allStudents().length){showToast("⚠️ No students found! Refresh first.");return;}
+    sendBtn.textContent="⏳ Sending…";sendBtn.disabled=true;
+    const students=allStudents();
+    // Save to Firebase (in-app notification)
+    for(const s of students){
+      await dbPush("notifications",{
+        studentId:s.id,student:s.name,type:"app",
+        time:Date.now(),isBroadcast:true,
+        subject:subj||"Announcement",message:msg,
+        msgType:broadType,from:APP.authUser.name
+      });
+    }
+    // Also send real push notification to all student devices
+    const pushTitle = subj||"📢 "+CI.short+" Announcement";
+    const pushBody = msg.length>100 ? msg.substring(0,100)+"…" : msg;
+    sendBtn.textContent="🔔 Send Notification to All Students";sendBtn.disabled=false;
+    subjInp.value="";msgArea.value="";
+    showToast(`✅ Notification sent to all ${students.length} students!`);
+    render();
+  });
+  css(sendBtn,{width:"100%",background:"linear-gradient(135deg,#16a34a,#15803d)",color:"#fff",border:"none",borderRadius:"12px",padding:"13px",fontSize:"13px",fontWeight:"800"});
+  broadBox.appendChild(sendBtn);
+  scroll.appendChild(broadBox);
+
+  // ── NOTIFICATIONS LOG ──
+  scroll.appendChild(secTitle("📋 Sent Notifications ("+APP.notifications.length+")"));
+  if(!APP.notifications.length){scroll.appendChild(emptyMsg("No notifications sent yet."));return;}
+
+  APP.notifications.forEach(n=>{
+    const isBroad=n.isBroadcast;
+    const card=div("notif-card");
+    card.style.background=isBroad?"#f0fdf4":"#f9fafb";
+    card.style.border=isBroad?"1px solid #bbf7d0":"1px solid #e5e7eb";
+    card.style.borderRadius="12px";
+
+    const ic=span("");ic.style.fontSize="22px";
+    ic.textContent=isBroad?(n.msgType==="exam"?"📝":n.msgType==="holiday"?"🎉":n.msgType==="fees"?"💳":n.msgType==="event"?"🎊":"📢"):"📊";
+
+    const info=div("");info.style.flex="1";
+
+    if(isBroad){
+      const badge=span("");badge.style.cssText="background:#16a34a;color:#fff;font-size:9px;font-weight:800;padding:1px 7px;border-radius:10px;margin-left:6px;";badge.textContent="ALL STUDENTS";
+      const topRow=div("");css(topRow,{display:"flex",alignItems:"center",gap:"4px",marginBottom:"3px"});
+      const nameEl=div("");nameEl.style.cssText="font-weight:700;font-size:13px;";nameEl.textContent=n.subject||"Announcement";
+      topRow.appendChild(nameEl);topRow.appendChild(badge);
+      const meta=div("");meta.style.cssText="font-size:10px;color:#6b7280;margin-bottom:4px;";
+      meta.textContent=`By ${n.from||"Staff"} • ${new Date(n.time).toLocaleString()}`;
+      const msgEl=div("");msgEl.style.cssText="font-size:11px;color:#374151;background:#fff;border-radius:8px;padding:6px 8px;margin-top:4px;line-height:1.5;";
+      msgEl.textContent=n.message||"";
+      info.appendChild(topRow);info.appendChild(meta);info.appendChild(msgEl);
+    } else {
+      info.innerHTML=`<div style="font-weight:700;font-size:13px">${n.student}</div><div style="font-size:11px;color:#6b7280">${new Date(n.time).toLocaleString()}</div>`;
+      const chips=div("");css(chips,{display:"flex",gap:"4px",flexWrap:"wrap",marginTop:"4px"});
+      Object.entries(n.marksWithGrades||n.marks||{}).forEach(([sub,val])=>{
+        const score=typeof val==="object"?val.score:val,grade=typeof val==="object"?val.grade:scoreToGrade(score),gc=GRADE_COLORS[grade]||"#6b7280";
+        const chip=span("");chip.style.cssText=`background:#f9fafb;border:1px solid ${gc}20;color:#374151;font-size:10px;padding:2px 5px;border-radius:6px;font-weight:600;display:inline-flex;align-items:center;gap:3px;`;
+        chip.innerHTML=`${sub}: ${score} <span style="background:${gc};color:#fff;border-radius:4px;padding:0 4px;font-weight:800">${grade}</span>`;
+        chips.appendChild(chip);
+      });
+      info.appendChild(chips);
+    }
+    card.appendChild(ic);card.appendChild(info);scroll.appendChild(card);
+  });
+}
+
+// ── PWA ────────────────────────────────────────────────────────
+// Write manifest as inline JSON in a script tag so Chrome can find it
+// Manifest is loaded from manifest.json file (hosted on Netlify)
+
+// Service Worker — only register on Netlify (not in preview)
+if("serviceWorker" in navigator && location.hostname !== "www.claudeusercontent.com"){
+  navigator.serviceWorker.register("sw.js").then(()=>{
+    console.log("SW registered ✅");
+  }).catch(e=>console.log("SW failed:",e));
+}
+
+// Install prompt — Android Chrome
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  showInstallBanner();
+});
+
+// Also show install button on app loaded
+window.addEventListener("appinstalled",()=>{
+  showToast("🎉 ACT Portal installed successfully!");
+  const bar=document.getElementById("install-bar");
+  if(bar)bar.remove();
+});
+
+function showInstallBanner(){
+  if(document.getElementById("install-bar"))return;
+  const b=document.createElement("div");
+  b.id="install-bar";
+  b.style.cssText="position:fixed;bottom:0;left:0;right:0;background:#15803d;color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;z-index:9999;font-family:inherit;box-shadow:0 -4px 24px rgba(0,0,0,0.3);";
+  b.innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="font-size:28px">📲</div>
+      <div>
+        <div style="font-weight:800;font-size:14px">Install ACT Portal</div>
+        <div style="font-size:11px;opacity:0.85">Add to Home Screen for quick access</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-shrink:0">
+      <button onclick="document.getElementById('install-bar').remove()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer">Later</button>
+      <button id="do-install" style="background:#fff;color:#16a34a;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer">Install ✓</button>
+    </div>`;
+  document.body.appendChild(b);
+  document.getElementById("do-install").onclick=async()=>{
+    if(!deferredPrompt)return;
+    deferredPrompt.prompt();
+    const{outcome}=await deferredPrompt.userChoice;
+    deferredPrompt=null;
+    document.getElementById("install-bar").remove();
+    if(outcome==="accepted")showToast("🎉 ACT Portal installed!");
+  };
+}
+
+// iOS Safari — show manual instructions
+function isIOS(){return/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;}
+function isInStandalone(){return window.navigator.standalone||window.matchMedia("(display-mode:standalone)").matches;}
+
+if(isIOS()&&!isInStandalone()){
+  setTimeout(()=>{
+    if(document.getElementById("ios-install"))return;
+    const b=document.createElement("div");
+    b.id="ios-install";
+    b.style.cssText="position:fixed;bottom:0;left:0;right:0;background:#15803d;color:#fff;padding:16px 16px 24px;z-index:9999;border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,0.3);font-family:inherit;";
+    b.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:26px">📲</div>
+          <div style="font-weight:800;font-size:15px">Install ACT Portal</div>
+        </div>
+        <button onclick="document.getElementById('ios-install').remove()" style="background:rgba(255,255,255,0.25);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:16px;cursor:pointer">×</button>
+      </div>
+      <div style="font-size:13px;line-height:1.9;opacity:0.95">
+        <div>1️⃣ Tap the <strong>Share</strong> button <strong>⎙</strong> at the bottom</div>
+        <div>2️⃣ Tap <strong>"Add to Home Screen"</strong></div>
+        <div>3️⃣ Tap <strong>Add</strong> — icon appears on home screen!</div>
+      </div>`;
+    document.body.appendChild(b);
+  },2000);
+}
+
+// ── Start ──────────────────────────────────────────────────────
+APP.fbConfig={databaseURL:FB_URL};
+render();
+</script>
+</body>
+</html>
