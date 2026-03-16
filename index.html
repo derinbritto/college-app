@@ -206,7 +206,92 @@ function loadSavedConfig(){try{return JSON.parse(localStorage.getItem("act_fb_co
 
 // ── Firebase REST API (no SDK needed!) ────────────────────────
 let FB_URL = "https://act-portal-ad480-default-rtdb.firebaseio.com";
+let sseConnections = [];
 
+function initFirebase(config) {
+  try {
+    FB_URL = config.databaseURL.replace(/\/+$/, "");
+    if(!FB_URL || !FB_URL.startsWith("http")) return false;
+    sseConnections.forEach(s=>s.close());
+    sseConnections = [];
+    APP.dbStatus = "connecting";
+    startListeners();
+    return true;
+  } catch(e) {
+    console.error("Firebase init error:", e);
+    return false;
+  }
+}
+
+function fbUrl(path) { return `${FB_URL}/${path}.json`; }
+
+async function dbGet(path) {
+  try {
+    const r = await fetch(fbUrl(path));
+    if(!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch(e) { APP.dbStatus="offline"; render(); return null; }
+}
+
+async function dbSet(path, value) {
+  APP.saving=true; render();
+  try {
+    await fetch(fbUrl(path), {method:"PUT", body:JSON.stringify(value), headers:{"Content-Type":"application/json"}});
+  } catch(e) { showToast("❌ Save failed. Check internet."); }
+  APP.saving=false; render();
+}
+
+async function dbUpdate(path, value) {
+  APP.saving=true; render();
+  try {
+    await fetch(fbUrl(path), {method:"PATCH", body:JSON.stringify(value), headers:{"Content-Type":"application/json"}});
+  } catch(e) { showToast("❌ Save failed. Check internet."); }
+  APP.saving=false; render();
+}
+
+async function dbPush(path, value) {
+  APP.saving=true; render();
+  try {
+    const r = await fetch(fbUrl(path), {method:"POST", body:JSON.stringify(value), headers:{"Content-Type":"application/json"}});
+    const d = await r.json();
+    APP.saving=false; render(); return d.name;
+  } catch(e) { showToast("❌ Save failed."); APP.saving=false; render(); return null; }
+}
+
+async function dbRemove(path) {
+  try { await fetch(fbUrl(path), {method:"DELETE"}); }
+  catch(e) { showToast("❌ Delete failed."); }
+}
+
+async function loadAllData() {
+  try {
+    const [students,staff,marks,grades,attendance,subjects,notifs] = await Promise.all([
+      dbGet("students"), dbGet("staff"), dbGet("marks"), dbGet("grades"),
+      dbGet("attendance"), dbGet("subjects"), dbGet("notifications")
+    ]);
+    APP.students   = students   || {};
+    APP.staffList  = staff      || {};
+    APP.marks      = marks      || {};
+    APP.grades     = grades     || {};
+    APP.attendance = attendance || {};
+    if(subjects && Array.isArray(subjects)) APP.subjects = subjects;
+    if(notifs) APP.notifications = Object.values(notifs).sort((a,b)=>b.time-a.time);
+    if(APP.authUser?.role==="student") {
+      const fresh = Object.values(APP.students).find(s=>s.id===APP.authUser.id);
+      if(fresh) APP.authUser = {...APP.authUser,...fresh};
+    }
+    APP.dbStatus = "online";
+    render();
+  } catch(e) {
+    APP.dbStatus = "offline";
+    render();
+  }
+}
+
+function startListeners() {
+  loadAllData();
+  setInterval(loadAllData, 3000);
+}
 
 // ── Helpers ────────────────────────────────────────────────────
 const scoreToGrade = s => s<50?"F":s>=91?"O":s>=81?"A+":s>=71?"A":s>=61?"B+":"B";
@@ -1268,11 +1353,13 @@ function buildLogView(scroll){
 // Write manifest as inline JSON in a script tag so Chrome can find it
 // Manifest is loaded from manifest.json file (hosted on Netlify)
 
-// Service Worker — only register on Netlify (not in preview)
-if("serviceWorker" in navigator && location.hostname !== "www.claudeusercontent.com"){
-  navigator.serviceWorker.register("sw.js").then(()=>{
-    console.log("SW registered ✅");
-  }).catch(e=>console.log("SW failed:",e));
+// Service Worker — only on hosted domains
+if("serviceWorker" in navigator &&
+   location.hostname !== "www.claudeusercontent.com" &&
+   location.hostname !== "localhost"){
+  navigator.serviceWorker.register("sw.js")
+    .then(()=>console.log("SW registered ✅"))
+    .catch(e=>console.log("SW failed:",e));
 }
 
 // Install prompt — Android Chrome
@@ -1347,6 +1434,7 @@ if(isIOS()&&!isInStandalone()){
 
 // ── Start ──────────────────────────────────────────────────────
 APP.fbConfig={databaseURL:FB_URL};
+initFirebase(APP.fbConfig);
 render();
 </script>
 </body>
